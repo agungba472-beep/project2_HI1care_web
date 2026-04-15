@@ -11,11 +11,18 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminUserController extends Controller
 {
+    public function index()
+    {
+        $users = User::all();
+        return view('admin.users', compact('users'));
+        // Pastikan nama view sesuai dengan resources/views/admin/users.blade.php
+    }
+
     public function indexNakes()
     {
         // Mengambil user dengan role 'nakes' beserta detail profilnya
         $nakesList = Nakes::with('user')->get();
-        return view('admin.nakes.index', compact('nakesList'));
+        return view('admin.nakes', compact('nakesList'));
     }
 
     public function storeNakes(Request $request)

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\RefillObat;
+use App\Models\Pasien;
 use App\Models\Notifikasi;
 use Illuminate\Http\Request;
 
@@ -15,8 +16,11 @@ class AdminRefillController extends Controller
         $requests = RefillObat::with('pasien')
                     ->orderByRaw("FIELD(status, 'pending', 'approved', 'rejected')")
                     ->get();
+
+        // Mengambil data pasien beserta relasinya
+        $upcomingRefills = Pasien::with(['master', 'user', 'refill'])->get();
                     
-        return view('admin.refill.index', compact('requests'));
+        return view('admin.refill', compact('requests', 'upcomingRefills'));
     }
 
     public function approve($id)
