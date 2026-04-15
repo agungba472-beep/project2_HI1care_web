@@ -23,7 +23,10 @@ class AdminDashboardController extends Controller
         return view('admin.dashboard', compact(
             'totalUser',
             'totalPasien',
-            'pending'
+            'pending',
+            'hijau',   // <- WAJIB DITAMBAHKAN
+            'kuning',  // <- WAJIB DITAMBAHKAN
+            'merah'    // <- WAJIB DITAMBAHKAN
         ));
     }
 }
