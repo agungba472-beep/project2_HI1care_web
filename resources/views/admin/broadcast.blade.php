@@ -1,66 +1,90 @@
 @extends('layouts.v_template')
 
 @section('content')
-<div class="container-fluid px-4">
-    <h1 class="mt-4">Pesan Broadcast</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item active">Kirim Informasi dan Modul Edukasi ke Semua Pasien</li>
-    </ol>
+@include('layouts.partials.admin-styles')
 
+<div class="admin-page">
+    {{-- Page Header --}}
+    <div class="page-header fade-up">
+        <i class="fas fa-bullhorn header-icon"></i>
+        <h1>Pesan Broadcast</h1>
+        <p>Kirim informasi dan modul edukasi ke semua pasien</p>
+    </div>
+
+    {{-- Alert --}}
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="hi-alert hi-alert-success fade-up">
+            <i class="fas fa-check-circle"></i> {{ session('success') }}
         </div>
     @endif
 
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <i class="fas fa-paper-plane me-1"></i> Buat Pesan Baru
+    <div class="row g-4">
+        {{-- Form Buat Pesan --}}
+        <div class="col-lg-4 fade-up">
+            <div class="hi-card">
+                <div class="hi-card-header">
+                    <span><i class="fas fa-paper-plane"></i> Buat Pesan Baru</span>
                 </div>
-                <div class="card-body">
-                    <form action="{{ route('admin.broadcast.store') }}" method="POST">
+                <div class="hi-card-body">
+                    <form action="{{ route('admin.broadcast.store') }}" method="POST" class="hi-form">
                         @csrf
                         <div class="mb-3">
-                            <label for="judul" class="form-label fw-bold">Judul Pesan</label>
-                            <input type="text" class="form-control" id="judul" name="judul" placeholder="Contoh: Jadwal Pengambilan Obat Libur Nasional" required>
+                            <label class="form-label">Judul Pesan</label>
+                            <input type="text" class="form-control" name="judul" placeholder="Contoh: Jadwal Pengambilan Obat" required>
                         </div>
                         <div class="mb-3">
-                            <label for="pesan" class="form-label fw-bold">Isi Pesan / Edukasi</label>
-                            <textarea class="form-control" id="pesan" name="pesan" rows="5" placeholder="Tuliskan pesan lengkap di sini..." required></textarea>
+                            <label class="form-label">Isi Pesan / Edukasi</label>
+                            <textarea class="form-control" name="pesan" rows="6" placeholder="Tuliskan pesan lengkap di sini..." required></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-send"></i> Kirim Broadcast Sekarang
+                        <button type="submit" class="hi-btn hi-btn-primary" style="width: 100%;">
+                            <i class="fas fa-paper-plane"></i> Kirim Broadcast
                         </button>
                     </form>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-8">
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header">
-                    <i class="fas fa-history me-1"></i> Riwayat Pesan Terkirim
+        {{-- Riwayat --}}
+        <div class="col-lg-8 fade-up">
+            <div class="hi-card">
+                <div class="hi-card-header">
+                    <span><i class="fas fa-history"></i> Riwayat Pesan Terkirim</span>
+                    <span class="hi-badge hi-badge-info">{{ $broadcasts->count() }} pesan</span>
                 </div>
-                <div class="card-body">
-                    <table id="datatablesSimple" class="table table-striped table-hover">
+                <div class="hi-card-body" style="padding: 0;">
+                    <table class="hi-table">
                         <thead>
                             <tr>
                                 <th>Tanggal & Waktu</th>
                                 <th>Judul Pesan</th>
-                                <th>Cuplikan Isi Pesan</th>
+                                <th>Cuplikan Isi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($broadcasts as $b)
+                            @forelse($broadcasts as $b)
                             <tr>
-                                <td>{{ $b->created_at->format('d M Y - H:i') }}</td>
-                                <td class="fw-bold">{{ $b->judul }}</td>
-                                <td>{{ Str::limit($b->pesan, 60, '...') }}</td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--success);"></div>
+                                        <span style="font-size: 0.82rem; color: var(--text-secondary);">
+                                            {{ $b->created_at->format('d M Y') }}
+                                            <span style="opacity: 0.6;">{{ $b->created_at->format('H:i') }}</span>
+                                        </span>
+                                    </div>
+                                </td>
+                                <td style="font-weight: 600;">{{ $b->judul }}</td>
+                                <td style="color: var(--text-secondary); font-size: 0.82rem;">{{ Str::limit($b->pesan, 60, '...') }}</td>
                             </tr>
-                            @endforeach
+                            @empty
+                            <tr>
+                                <td colspan="3">
+                                    <div class="hi-empty">
+                                        <i class="fas fa-paper-plane"></i>
+                                        <p>Belum ada pesan broadcast terkirim</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>

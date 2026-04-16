@@ -29,6 +29,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
     Route::post('/users/{id}/approve', [AdminUserController::class, 'approve'])->name('users.approve');
     Route::post('/users/{id}/reject', [AdminUserController::class, 'reject'])->name('users.reject');
+    Route::post('/users/store-nakes', [AdminUserController::class, 'storeNakes'])->name('users.storeNakes');
+    Route::post('/master/store', [AdminUserController::class, 'storeMaster'])->name('master.store');
 
     Route::get('/pasien', [AdminPasienController::class, 'index'])->name('pasien.index');
     Route::get('/refill', [AdminRefillController::class, 'index'])->name('refill.index');

@@ -1,69 +1,109 @@
 @extends('layouts.v_template')
 
 @section('content')
-<div class="container-fluid px-4">
-    <h1 class="mt-4">Laporan & Rekapitulasi</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item active">Ringkasan Data Pasien HI!-CARE</li>
-    </ol>
+@include('layouts.partials.admin-styles')
 
-    <div class="row">
-        <div class="col-xl-6 col-md-6">
-            <div class="card bg-primary text-white mb-4 shadow">
-                <div class="card-body d-flex justify-content-between align-items-center">
+<div class="admin-page">
+    {{-- Page Header --}}
+    <div class="page-header fade-up">
+        <i class="fas fa-file-medical-alt header-icon"></i>
+        <h1>Laporan & Rekapitulasi</h1>
+        <p>Ringkasan data pasien HI!-CARE</p>
+    </div>
+
+    {{-- Stat Mini Cards --}}
+    <div class="row g-3 mb-4">
+        <div class="col-md-6 fade-up">
+            <div class="hi-stat">
+                <div class="hi-stat-accent" style="background: linear-gradient(180deg, var(--primary), var(--accent));"></div>
+                <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="small">Total Pasien Terdaftar</div>
-                        <h2 class="display-6 fw-bold mb-0">{{ $totalPasien }}</h2>
+                        <div class="hi-stat-label">Total Pasien Terdaftar</div>
+                        <div class="hi-stat-number" style="color: var(--primary);">{{ $totalPasien }}</div>
                     </div>
-                    <i class="fas fa-users fa-3x opacity-50"></i>
+                    <div class="hi-stat-icon" style="background: rgba(8,145,178,0.1); color: var(--primary);">
+                        <i class="fas fa-users"></i>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-xl-6 col-md-6">
-            <div class="card bg-success text-white mb-4 shadow">
-                <div class="card-body d-flex justify-content-between align-items-center">
+        <div class="col-md-6 fade-up">
+            <div class="hi-stat">
+                <div class="hi-stat-accent" style="background: linear-gradient(180deg, #34d399, var(--success));"></div>
+                <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="small">Total Refill Obat Disetujui</div>
-                        <h2 class="display-6 fw-bold mb-0">{{ $totalRefillSelesai }}</h2>
+                        <div class="hi-stat-label">Total Refill Obat Selesai</div>
+                        <div class="hi-stat-number" style="color: var(--success);">{{ $totalRefillSelesai }}</div>
                     </div>
-                    <i class="fas fa-pills fa-3x opacity-50"></i>
+                    <div class="hi-stat-icon" style="background: var(--success-light); color: var(--success);">
+                        <i class="fas fa-pills"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <div>
-                <i class="fas fa-table me-1"></i> Data Detail Pasien
-            </div>
-            <button class="btn btn-sm btn-outline-success">
+    {{-- Data Table --}}
+    <div class="hi-card fade-up">
+        <div class="hi-card-header">
+            <span><i class="fas fa-table"></i> Data Detail Pasien</span>
+            <button class="hi-btn hi-btn-outline hi-btn-sm" style="color: var(--success); border-color: var(--success);">
                 <i class="fas fa-file-excel"></i> Export Excel
             </button>
         </div>
-        <div class="card-body">
-            <table id="datatablesSimple" class="table table-bordered table-hover">
-                <thead class="table-light">
+        <div class="hi-card-body" style="padding: 0;">
+            <table class="hi-table">
+                <thead>
                     <tr>
                         <th>No. Registrasi HIV</th>
                         <th>Nama Pasien</th>
-                        <th>Status Kepatuhan Terakhir</th>
+                        <th>Status Kepatuhan</th>
                         <th>Tanggal Terdaftar</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($dataLaporan as $laporan)
+                    @forelse($dataLaporan as $laporan)
                     <tr>
-                        <td class="text-center">{{ $laporan->master->no_reg_hiv ?? 'Belum ada' }}</td>
-                        <td>{{ $laporan->user->nama ?? 'Data User Hilang' }}</td>
-                        <td class="text-center">
-                            <span class="badge {{ $laporan->status_kepatuhan == 'hijau' ? 'bg-success' : 'bg-danger' }}">
-                                {{ strtoupper($laporan->status_kepatuhan ?? 'BELUM ADA DATA') }}
+                        <td><span class="hi-code">{{ $laporan->master->no_reg_hiv ?? 'Belum ada' }}</span></td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                @php
+                                    $avatarColors = ['#0891b2','#0e7490','#059669','#2563eb','#7c3aed','#d97706'];
+                                    $lIni = strtoupper(substr($laporan->user->nama ?? 'P', 0, 1));
+                                    $lCol = $avatarColors[ord($lIni) % count($avatarColors)];
+                                @endphp
+                                <div class="hi-avatar" style="background:{{ $lCol }}">{{ $lIni }}</div>
+                                <span style="font-weight: 600;">{{ $laporan->user->nama ?? 'Data User Hilang' }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            @if($laporan->status_kepatuhan == 'hijau')
+                                <span class="hi-badge hi-badge-success"><i class="fas fa-check-circle me-1"></i>Patuh</span>
+                            @elseif($laporan->status_kepatuhan == 'kuning')
+                                <span class="hi-badge hi-badge-warning"><i class="fas fa-exclamation-circle me-1"></i>Peringatan</span>
+                            @elseif($laporan->status_kepatuhan == 'merah')
+                                <span class="hi-badge hi-badge-danger"><i class="fas fa-times-circle me-1"></i>Drop-out</span>
+                            @else
+                                <span class="hi-badge hi-badge-muted">{{ strtoupper($laporan->status_kepatuhan ?? 'N/A') }}</span>
+                            @endif
+                        </td>
+                        <td>
+                            <span style="font-size: 0.82rem; color: var(--text-secondary);">
+                                <i class="fas fa-calendar me-1" style="font-size: 0.7rem;"></i>
+                                {{ $laporan->created_at->format('d M Y') }}
                             </span>
                         </td>
-                        <td>{{ $laporan->created_at->format('d M Y') }}</td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="4">
+                            <div class="hi-empty">
+                                <i class="fas fa-chart-bar"></i>
+                                <p>Belum ada data laporan</p>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

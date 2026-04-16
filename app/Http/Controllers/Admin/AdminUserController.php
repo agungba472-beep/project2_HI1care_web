@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\PasienMaster;
 use App\Models\Nakes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -13,9 +14,11 @@ class AdminUserController extends Controller
 {
     public function index()
     {
+        $nakes = Nakes::with('user')->get();
+        $pasienMaster = PasienMaster::all();
         $users = User::all();
-        return view('admin.users', compact('users'));
-        // Pastikan nama view sesuai dengan resources/views/admin/users.blade.php
+
+        return view('admin.users', compact('nakes', 'pasienMaster', 'users'));
     }
 
     public function indexNakes()
@@ -70,5 +73,21 @@ class AdminUserController extends Controller
 
         // Logika tambahan: Kirim notifikasi ke email/aplikasi jika diperlukan
         return redirect()->back()->with('success', 'Akun ' . $user->nama . ' berhasil diverifikasi.');
+    }
+
+    public function storeMaster(Request $request)
+    {
+        $request->validate([
+            'no_reg_hiv' => 'required|string|unique:pasien_master,no_reg_hiv',
+            'nama' => 'required|string|max:255',
+        ]);
+
+        PasienMaster::create([
+            'no_reg_hiv' => $request->no_reg_hiv,
+            'nama' => $request->nama,
+            'is_registered' => false,
+        ]);
+
+        return redirect()->back()->with('success', 'Data master pasien berhasil ditambahkan.');
     }
 }
