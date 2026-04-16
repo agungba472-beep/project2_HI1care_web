@@ -38,3 +38,6 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/laporan', [AdminLaporanController::class, 'index'])->name('laporan.index');
     Route::post('/admin/broadcast', [AdminBroadcastController::class, 'store'])->name('admin.broadcast.store');
 });
+Route::get('/edukasi', [\App\Http\Controllers\Admin\AdminEdukasiController::class, 'index'])->name('edukasi.index');
+    Route::post('/edukasi', [\App\Http\Controllers\Admin\AdminEdukasiController::class, 'store'])->name('edukasi.store');
+    Route::delete('/edukasi/{id}', [\App\Http\Controllers\Admin\AdminEdukasiController::class, 'destroy'])->name('edukasi.destroy');

@@ -37,6 +37,10 @@
                     <div class="sb-nav-link-icon"><i class="fas fa-bullhorn"></i></div>
                     Broadcast
                 </a>
+                <a class="nav-link" href="{{ route('admin.edukasi.index') }}">
+                    <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div>
+                    modul edukasi
+                </a>
                 <a class="nav-link" href="{{ route('admin.laporan.index') }}">
                     <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div>
                     Laporan Pasien

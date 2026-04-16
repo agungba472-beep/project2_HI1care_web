@@ -39,20 +39,20 @@ class AdminUserController extends Controller
             
             // 1. Buat Akun User
             $user = User::create([
-                'name' => $request->nama_nakes,
+                'name' => $request->nama_nakes, // Ingat: Laravel default pakai 'name', bukan 'nama'
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'role' => 'nakes',
-                'is_active' => true
-            ]);
+                'status_akun' => 'aktif' // Disamakan dengan fungsi approve()
+    ]);
 
             // 2. Buat Profil Nakes
             Nakes::create([
                 'user_id' => $user->id,
-                'nama_nakes' => $request->nama_nakes,
-                'spesialisasi' => $request->spesialisasi,
-                'no_sip' => $request->no_sip, // Surat Izin Praktik
-                'no_telepon' => $request->no_telepon,
+                'nama'    => $request->nama_nakes,   // DB: 'nama' -> Request: 'nama_nakes'
+                'profesi' => $request->spesialisasi, // DB: 'profesi' -> Request: 'spesialisasi'
+                'no_sip'  => $request->no_sip,
+                'no_hp'   => $request->no_telepon,   // DB: 'no_hp' -> Request: 'no_telepon'
             ]);
 
             DB::commit();

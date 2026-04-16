@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="" />
     <meta name="author" content="" />
-    <title>SARPRAS JTIK</title>
+    <title>HI1Care</title>
 
     {{-- SB Admin CSS --}}
     <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
@@ -23,7 +23,7 @@
         <!-- Navbar Brand-->
         <a class="navbar-brand ps-3 d-flex align-items-center" href="#">
             <img src="{{ asset('images/logo_polsub.png') }}" alt="Logo" class="logo me-2">
-            <span class="fw-bold">SARPRAS JTIK</span>
+            <span class="fw-bold">HI1Care</span>
         </a>
 
         <!-- Sidebar Toggle -->
@@ -74,7 +74,7 @@
             <footer class="py-4 bg-light mt-auto">
                 <div class="container-fluid px-4">
                     <div class="d-flex align-items-center justify-content-between small">
-                        <div class="text-muted">© SARPRAS JTIK {{ date('Y') }}</div>
+                        <div class="text-muted">© HI1Care {{ date('Y') }}</div>
                         <div>
                             <a href="#">Privacy Policy</a>
                             &middot;

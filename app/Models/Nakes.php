@@ -14,6 +14,7 @@ class Nakes extends Model
         'user_id',
         'nama',
         'profesi',
+        'no_sip',
         'no_hp'
     ];
 
