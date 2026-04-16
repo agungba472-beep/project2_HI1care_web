@@ -36,5 +36,5 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/broadcast', [AdminBroadcastController::class, 'send'])->name('broadcast.send');
 
     Route::get('/laporan', [AdminLaporanController::class, 'index'])->name('laporan.index');
-
+    Route::post('/admin/broadcast', [AdminBroadcastController::class, 'store'])->name('admin.broadcast.store');
 });

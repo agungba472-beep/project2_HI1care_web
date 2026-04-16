@@ -3,43 +3,36 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-
 use App\Models\Broadcast;
-use App\Models\User;
-use App\Models\Notifikasi;
+use Illuminate\Http\Request;
 
 class AdminBroadcastController extends Controller
 {
+    // Menampilkan halaman Broadcast beserta riwayat pesan
     public function index()
     {
-        return view('admin.broadcast');
+        // Mengambil data broadcast dari yang terbaru
+        $broadcasts = Broadcast::orderBy('created_at', 'desc')->get();
+        return view('admin.broadcast', compact('broadcasts'));
     }
 
-    public function send(Request $request)
+    // Menyimpan pesan broadcast baru ke database
+    public function store(Request $request)
     {
+        // 1. Validasi inputan form
         $request->validate([
-            'pesan' => 'required'
+            'judul' => 'required|string|max:255',
+            'pesan' => 'required|string',
         ]);
 
-        $admin = auth()->user()->admin;
-
+        // 2. Simpan ke database
         Broadcast::create([
-            'admin_id' => $admin->id,
-            'pesan' => $request->pesan
+            'judul' => $request->judul,
+            'pesan' => $request->pesan,
+            // Jika di tabel ada kolom pembuat: 'admin_id' => auth()->user()->id,
         ]);
 
-        // kirim ke semua pasien
-        $users = User::where('role', 'pasien')->get();
-
-        foreach ($users as $user) {
-            Notifikasi::create([
-                'user_id' => $user->id,
-                'judul' => 'Pengumuman',
-                'pesan' => $request->pesan
-            ]);
-        }
-
-        return back()->with('success', 'Broadcast berhasil dikirim');
+        // 3. Kembali ke halaman sebelumnya dengan pesan sukses
+        return redirect()->back()->with('success', 'Pesan Broadcast berhasil dikirim dan disimpan!');
     }
 }
