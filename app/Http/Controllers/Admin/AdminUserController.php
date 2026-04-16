@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\PasienMaster;
+use App\Models\Pasien;
 use App\Models\Nakes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -89,5 +90,31 @@ class AdminUserController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Data master pasien berhasil ditambahkan.');
+    }
+    public function destroy($id)
+    {
+        // 1. Cari data user berdasarkan ID
+        $user = User::findOrFail($id);
+
+        // 2. Hapus data berelasi (Opsional, tapi sangat disarankan jika database tidak otomatis Cascade)
+        if ($user->role === 'nakes') {
+            Nakes::where('user_id', $user->id)->delete();
+        } elseif ($user->role === 'pasien') {
+            Pasien::where('user_id', $user->id)->delete();
+        }
+
+        // 3. Hapus akun utamanya
+        $user->delete();
+
+        // 4. Kembali ke halaman sebelumnya dengan pesan sukses
+        return redirect()->back()->with('success', 'Akun pengguna dan data terkait berhasil dihapus permanen!');
+    }
+
+    public function destroyMaster($id)
+    {
+        $master = PasienMaster::findOrFail($id);
+        $master->delete();
+
+        return redirect()->back()->with('success', 'Data master pasien berhasil dihapus.');
     }
 }

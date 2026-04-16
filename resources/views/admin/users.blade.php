@@ -75,7 +75,11 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <button class="hi-btn hi-btn-danger hi-btn-sm" title="Hapus"><i class="fas fa-trash"></i></button>
+                                    <form action="{{ route('admin.master.destroy', $m->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus data master ini?');" style="display:inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="hi-btn hi-btn-danger hi-btn-sm" title="Hapus"><i class="fas fa-trash"></i></button>
+                                    </form>
                                 </td>
                             </tr>
                             @empty
@@ -130,7 +134,14 @@
                                 <td style="color: var(--text-secondary);">{{ $n->user->username }}</td>
                                 <td><span class="hi-badge hi-badge-info">{{ $n->bidang ?? $n->profesi ?? 'Umum' }}</span></td>
                                 <td>
-                                    <button class="hi-btn hi-btn-warning hi-btn-sm" title="Edit"><i class="fas fa-edit"></i></button>
+                                    <div class="d-flex gap-1">
+                                        <button class="hi-btn hi-btn-warning hi-btn-sm" title="Edit"><i class="fas fa-edit"></i></button>
+                                        <form action="{{ route('admin.users.destroy', $n->user->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus akun nakes ini?');" style="display:inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="hi-btn hi-btn-danger hi-btn-sm" title="Hapus"><i class="fas fa-trash"></i></button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             @empty
@@ -163,6 +174,7 @@
                                 <th>Username</th>
                                 <th>Role</th>
                                 <th>Status</th>
+                                <th style="width: 100px;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -197,10 +209,19 @@
                                         <span class="hi-badge hi-badge-danger">{{ ucfirst($user->status_akun) }}</span>
                                     @endif
                                 </td>
+                                <td>
+                                    @if($user->role !== 'admin')
+                                    <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus akun {{ $user->nama }}?');" style="display:inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="hi-btn hi-btn-danger hi-btn-sm" title="Hapus"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                    @endif
+                                </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="4">
+                                <td colspan="5">
                                     <div class="hi-empty">
                                         <i class="fas fa-users"></i>
                                         <p>Belum ada akun terdaftar</p>
