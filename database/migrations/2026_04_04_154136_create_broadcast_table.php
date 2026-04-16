@@ -10,15 +10,17 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-        Schema::create('broadcast', function (Blueprint $table) {
+{
+    Schema::create('broadcast', function (Blueprint $table) {
         $table->id();
-        $table->foreignId('admin_id')->constrained('admin');
+        $table->foreignId('admin_id')->constrained('admin')->onDelete('cascade');
+        $table->string('judul'); // Kolom yang tadi kita tambahkan
         $table->text('pesan');
-        $table->timestamp('tanggal_kirim')->useCurrent();
-        });
-    }
-
+        
+        // Baris ini SANGAT PENTING untuk mengatasi error "created_at"
+        $table->timestamps(); 
+    });
+}
     /**
      * Reverse the migrations.
      */

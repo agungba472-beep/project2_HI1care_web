@@ -18,21 +18,24 @@ class AdminBroadcastController extends Controller
 
     // Menyimpan pesan broadcast baru ke database
     public function store(Request $request)
-    {
-        // 1. Validasi inputan form
-        $request->validate([
-            'judul' => 'required|string|max:255',
-            'pesan' => 'required|string',
-        ]);
+{
+    // 1. Validasi inputan form
+    $request->validate([
+        'judul' => 'required|string|max:255',
+        'pesan' => 'required|string',
+    ]);
 
-        // 2. Simpan ke database
-        Broadcast::create([
-            'judul' => $request->judul,
-            'pesan' => $request->pesan,
-            // Jika di tabel ada kolom pembuat: 'admin_id' => auth()->user()->id,
-        ]);
+    // 2. Simpan ke database dengan menyertakan admin_id
+    Broadcast::create([
+        // Mengambil ID admin yang sedang login. 
+        // (Sensei tambahkan "?? 1" sebagai data cadangan agar tidak error jika kamu sedang mengetesnya tanpa login)
+        'admin_id' => auth()->id() ?? 1, 
+        
+        'judul' => $request->judul,
+        'pesan' => $request->pesan,
+    ]);
 
-        // 3. Kembali ke halaman sebelumnya dengan pesan sukses
-        return redirect()->back()->with('success', 'Pesan Broadcast berhasil dikirim dan disimpan!');
-    }
+    // 3. Kembali ke halaman sebelumnya dengan pesan sukses
+    return redirect()->back()->with('success', 'Pesan Broadcast berhasil dikirim dan disimpan!');
+}
 }

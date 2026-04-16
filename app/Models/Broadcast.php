@@ -9,7 +9,7 @@ class Broadcast extends Model
     // INI TAMBAHANNYA
     protected $table = 'broadcast';
 
-    protected $fillable = ['admin_id','pesan'];
+    protected $fillable = ['admin_id', 'judul', 'pesan'];
 
     public function admin()
     {

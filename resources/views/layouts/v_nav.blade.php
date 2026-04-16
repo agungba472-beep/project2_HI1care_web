@@ -27,7 +27,7 @@
                 </a>
                 <a class="nav-link" href="{{ route('admin.pasien.index') }}">
                     <div class="sb-nav-link-icon"><i class="fas fa-notes-medical"></i></div>
-                    Monitoring Pasien
+                    Monitoring Kepatuhan
                 </a>
                 <a class="nav-link" href="{{ route('admin.refill.index') }}">
                     <div class="sb-nav-link-icon"><i class="fas fa-pills"></i></div>
@@ -53,10 +53,5 @@
             </div>
         </div>
 
-        {{-- Footer --}}
-        <div class="sb-sidenav-footer">
-            <div class="small">Logged in as:</div>
-            {{ $username ?? 'Guest' }} ({{ $role ?? 'Unknown' }})
-        </div>
     </nav>
 </div>
