@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Broadcast extends Model
 {
+    // INI TAMBAHANNYA
+    protected $table = 'broadcast';
+
     protected $fillable = ['admin_id','pesan'];
 
     public function admin()

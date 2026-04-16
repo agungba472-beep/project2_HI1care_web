@@ -29,7 +29,7 @@ class AdminUserController extends Controller
     {
         $request->validate([
             'nama_nakes' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => 'required|unique:users,username', // Ganti pengecekan email ke username
             'spesialisasi' => 'required',
             'password' => 'required|min:8'
         ]);
@@ -39,20 +39,20 @@ class AdminUserController extends Controller
             
             // 1. Buat Akun User
             $user = User::create([
-                'name' => $request->nama_nakes, // Ingat: Laravel default pakai 'name', bukan 'nama'
-                'email' => $request->email,
+                'nama' => $request->nama_nakes,     // DIUBAH menjadi 'nama'
+                'username' => $request->email,      // DIUBAH menjadi 'username'
                 'password' => Hash::make($request->password),
                 'role' => 'nakes',
-                'status_akun' => 'aktif' // Disamakan dengan fungsi approve()
-    ]);
+                'status_akun' => 'aktif'
+            ]);
 
             // 2. Buat Profil Nakes
             Nakes::create([
                 'user_id' => $user->id,
-                'nama'    => $request->nama_nakes,   // DB: 'nama' -> Request: 'nama_nakes'
-                'profesi' => $request->spesialisasi, // DB: 'profesi' -> Request: 'spesialisasi'
+                'nama'    => $request->nama_nakes,
+                'profesi' => $request->spesialisasi,
                 'no_sip'  => $request->no_sip,
-                'no_hp'   => $request->no_telepon,   // DB: 'no_hp' -> Request: 'no_telepon'
+                'no_hp'   => $request->no_telepon,
             ]);
 
             DB::commit();

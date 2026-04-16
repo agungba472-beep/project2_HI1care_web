@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\AdminPasienController;
 use App\Http\Controllers\Admin\AdminRefillController;
 use App\Http\Controllers\Admin\AdminLaporanController;
 use App\Http\Controllers\Admin\AdminBroadcastController;
+use App\Http\Controllers\Admin\AdminEdukasiController;
 use App\Http\Controllers\Auth\WebAuthController;
 
 Route::get('/', function () {
@@ -36,8 +37,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/broadcast', [AdminBroadcastController::class, 'send'])->name('broadcast.send');
 
     Route::get('/laporan', [AdminLaporanController::class, 'index'])->name('laporan.index');
-    Route::post('/admin/broadcast', [AdminBroadcastController::class, 'store'])->name('admin.broadcast.store');
+    Route::post('/broadcast/store', [AdminBroadcastController::class, 'store'])->name('broadcast.store');
+
+    Route::get('/edukasi', [AdminEdukasiController::class, 'index'])->name('edukasi.index');
+    Route::post('/edukasi', [AdminEdukasiController::class, 'store'])->name('edukasi.store');
+    Route::delete('/edukasi/{id}', [AdminEdukasiController::class, 'destroy'])->name('edukasi.destroy');
+
+    Route::get('/pasien/{id}', [AdminPasienController::class, 'show'])->name('pasien.show');
 });
-Route::get('/edukasi', [\App\Http\Controllers\Admin\AdminEdukasiController::class, 'index'])->name('edukasi.index');
-    Route::post('/edukasi', [\App\Http\Controllers\Admin\AdminEdukasiController::class, 'store'])->name('edukasi.store');
-    Route::delete('/edukasi/{id}', [\App\Http\Controllers\Admin\AdminEdukasiController::class, 'destroy'])->name('edukasi.destroy');

@@ -6,14 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class RefillObat extends Model
 {
-    // Tambahkan baris ini agar Laravel tidak mencari 'refill_obats'
     protected $table = 'refill_obat';
 
-    // Tambahkan baris ini agar seeder bisa memasukkan data
     protected $fillable = [
         'pasien_id',
         'tanggal_refill',
         'siklus_ke',
         'status'
     ];
+
+    // INI TAMBAHANNYA
+    public function pasien()
+    {
+        return $this->belongsTo(Pasien::class, 'pasien_id');
+    }
 }
