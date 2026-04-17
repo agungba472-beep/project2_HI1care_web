@@ -32,10 +32,9 @@ class AdminUserController extends Controller
     public function storeNakes(Request $request)
     {
         $request->validate([
-            'nama_nakes' => 'required|string|max:255',
-            'email' => 'required|unique:users,username', // Ganti pengecekan email ke username
-            'spesialisasi' => 'required',
-            'password' => 'required|min:8'
+            'nama' => 'required|string|max:255',
+            'username' => 'required|unique:users,username',
+            'password' => 'required|min:6'
         ]);
 
         try {
@@ -43,8 +42,8 @@ class AdminUserController extends Controller
             
             // 1. Buat Akun User
             $user = User::create([
-                'nama' => $request->nama_nakes,     // DIUBAH menjadi 'nama'
-                'username' => $request->email,      // DIUBAH menjadi 'username'
+                'nama' => $request->nama,
+                'username' => $request->username,
                 'password' => Hash::make($request->password),
                 'role' => 'nakes',
                 'status_akun' => 'aktif'
@@ -53,10 +52,10 @@ class AdminUserController extends Controller
             // 2. Buat Profil Nakes
             Nakes::create([
                 'user_id' => $user->id,
-                'nama'    => $request->nama_nakes,
-                'profesi' => $request->spesialisasi,
+                'nama'    => $request->nama,
+                'profesi' => $request->spesialisasi ?? 'Umum',
                 'no_sip'  => $request->no_sip,
-                'no_hp'   => $request->no_telepon,
+                'no_hp'   => $request->no_hp,
             ]);
 
             DB::commit();

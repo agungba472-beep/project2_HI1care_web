@@ -38,13 +38,23 @@
                     Broadcast
                 </a>
                 <a class="nav-link" href="{{ route('admin.edukasi.index') }}">
-                    <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div>
-                    modul edukasi
+                    <div class="sb-nav-link-icon"><i class="fas fa-book-medical"></i></div>
+                    Modul Edukasi
                 </a>
                 <a class="nav-link" href="{{ route('admin.laporan.index') }}">
-                    <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div>
+                    <div class="sb-nav-link-icon"><i class="fas fa-chart-bar"></i></div>
                     Laporan Pasien
                 </a>
+
+                {{-- === Logout === --}}
+                <div class="sb-sidenav-menu-heading">Akun</div>
+                <a class="nav-link text-danger" href="#" onclick="event.preventDefault(); document.getElementById('sidebar-logout-form').submit();">
+                    <div class="sb-nav-link-icon"><i class="fas fa-sign-out-alt text-danger"></i></div>
+                    Logout
+                </a>
+                <form id="sidebar-logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                    @csrf
+                </form>
 
                 <div class="sb-sidenav-footer mt-3">
                     <div class="small">Logged in as:</div>
@@ -54,4 +64,4 @@
         </div>
 
     </nav>
-</div>
+</div>

@@ -47,9 +47,9 @@
     <div class="hi-card fade-up">
         <div class="hi-card-header">
             <span><i class="fas fa-table"></i> Data Detail Pasien</span>
-            <button class="hi-btn hi-btn-outline hi-btn-sm" style="color: var(--success); border-color: var(--success);">
-                <i class="fas fa-file-excel"></i> Export Excel
-            </button>
+            <a href="{{ route('admin.laporan.export', ['filter_bulan' => request('filter_bulan')]) }}" class="hi-btn hi-btn-success hi-btn-sm">
+                <i class="fas fa-file-excel"></i> Export ke Excel (.csv)
+            </a>
         </div>
         <div class="hi-card-body" style="padding: 0;">
             <table class="hi-table">

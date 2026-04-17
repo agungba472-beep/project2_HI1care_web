@@ -40,6 +40,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/broadcast', [AdminBroadcastController::class, 'send'])->name('broadcast.send');
 
     Route::get('/laporan', [AdminLaporanController::class, 'index'])->name('laporan.index');
+    Route::get('/laporan/export', [AdminLaporanController::class, 'exportExcel'])->name('laporan.export');
     Route::post('/broadcast/store', [AdminBroadcastController::class, 'store'])->name('broadcast.store');
 
     Route::get('/edukasi', [AdminEdukasiController::class, 'index'])->name('edukasi.index');

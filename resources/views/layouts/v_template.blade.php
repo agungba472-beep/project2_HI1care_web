@@ -52,7 +52,14 @@
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                     <li><a class="dropdown-item" href="/profile">Profile</a></li>
                     <li><hr class="dropdown-divider" /></li>
-                    <li><a class="dropdown-item text-danger" href="{{ url('/logout') }}">Logout</a></li>
+                    <li>
+                        <a class="dropdown-item text-danger" href="#" onclick="event.preventDefault(); document.getElementById('topnav-logout-form').submit();">
+                            <i class="fas fa-sign-out-alt me-1"></i> Logout
+                        </a>
+                        <form id="topnav-logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                            @csrf
+                        </form>
+                    </li>
                 </ul>
             </li>
         </ul>

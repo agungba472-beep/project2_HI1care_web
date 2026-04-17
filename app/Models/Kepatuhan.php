@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Kepatuhan extends Model
 {
+    // Beri tahu Laravel nama tabel aslinya agar tidak ditambah huruf 's'
+    protected $table = 'kepatuhan';
+
     public $timestamps = false;
 
     protected $fillable = ['pasien_id','status','last_update'];

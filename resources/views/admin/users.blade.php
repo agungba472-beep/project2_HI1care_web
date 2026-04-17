@@ -258,7 +258,15 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Password Awal</label>
-                        <input type="password" name="password" class="form-control" placeholder="Minimal 8 karakter" required>
+                        <input type="password" name="password" class="form-control" placeholder="Minimal 6 karakter" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">No. SIP</label>
+                        <input type="text" name="no_sip" class="form-control" placeholder="Nomor Surat Izin Praktik">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">No. HP</label>
+                        <input type="text" name="no_hp" class="form-control" placeholder="Contoh: 08123456789">
                     </div>
                 </div>
                 <div class="modal-footer">
