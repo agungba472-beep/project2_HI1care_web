@@ -18,7 +18,7 @@
         <div class="hi-card-header">
             <span><i class="fas fa-users"></i> Daftar Pasien Terdaftar</span>
             <button class="hi-btn hi-btn-primary hi-btn-sm" data-bs-toggle="modal" data-bs-target="#addPatientModal">
-                <i class="fas fa-plus"></i> Tambah Pasien Manual
+                <i class="fas fa-plus"></i> Tambah
             </button>
         </div>
         <div class="hi-card-body" style="padding: 0;">
@@ -72,9 +72,6 @@
                                 <a href="{{ route('admin.pasien.show', $patient->id) }}" class="hi-btn hi-btn-info hi-btn-sm" title="Detail">
                                     <i class="fas fa-eye"></i> Detail
                                 </a>
-                                <button class="hi-btn hi-btn-warning hi-btn-sm toggle-status-btn" data-id="{{ $patient->id }}" title="Ubah Status">
-                                    <i class="fas fa-power-off"></i>
-                                </button>
                             </div>
                         </td>
                     </tr>
