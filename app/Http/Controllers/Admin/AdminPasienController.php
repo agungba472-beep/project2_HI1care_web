@@ -13,11 +13,26 @@ class AdminPasienController extends Controller
 {
     /**
      * Menampilkan daftar seluruh pasien HIV yang terdaftar.
+     * Mendukung filter pencarian nama dan status kepatuhan (FR-A02).
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Eager load relasi 'user' untuk mengambil email/status akun
-        $patients = Pasien::with('user')->orderBy('created_at', 'desc')->get();
+        $query = Pasien::with(['user', 'master']);
+
+        // Filter: Pencarian berdasarkan nama (via relasi master)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('master', function ($q) use ($search) {
+                $q->where('nama', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Filter: Status kepatuhan (exact match)
+        if ($request->filled('status')) {
+            $query->where('status_kepatuhan', $request->status);
+        }
+
+        $patients = $query->orderBy('created_at', 'desc')->get();
         
         return view('admin.pasien', compact('patients'));
     }
@@ -27,11 +42,11 @@ class AdminPasienController extends Controller
      */
     public function show($id)
     {
-        $patient = Pasien::with(['user', 'kepatuhan', 'diaryHarian', 'refillObat'])->findOrFail($id);
+        $patient = Pasien::with(['user', 'master', 'kepatuhan', 'diaryHarian', 'refillObat'])->findOrFail($id);
         
-        // Kalkulasi persentase kepatuhan (contoh logika sederhana)
+        // Kalkulasi persentase kepatuhan berdasarkan status hijau (patuh)
         $totalDoses = $patient->kepatuhan->count();
-        $takenDoses = $patient->kepatuhan->where('status', 'diminum')->count();
+        $takenDoses = $patient->kepatuhan->where('status', 'hijau')->count();
         
         $adherenceRate = $totalDoses > 0 ? round(($takenDoses / $totalDoses) * 100, 2) : 0;
 

@@ -75,6 +75,14 @@ class AdminUserController extends Controller
         return redirect()->back()->with('success', 'Akun ' . $user->nama . ' berhasil diverifikasi.');
     }
 
+    public function reject($id)
+    {
+        $user = User::findOrFail($id);
+        $user->update(['status_akun' => 'ditolak']);
+
+        return redirect()->back()->with('success', 'Akun ' . $user->nama . ' telah ditolak.');
+    }
+
     public function storeMaster(Request $request)
     {
         $request->validate([

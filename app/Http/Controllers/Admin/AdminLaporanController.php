@@ -22,50 +22,59 @@ class AdminLaporanController extends Controller
         return view('admin.laporan', compact('totalPasien', 'totalRefillSelesai', 'dataLaporan'));
     }
     public function exportExcel(Request $request)
-{
-    // 1. Ambil data dengan filter yang sama seperti di halaman index
-    $query = \App\Models\Kepatuhan::with(['pasien.user', 'pasien.pasienMaster']);
+    {
+        // 1. Query pasien dengan filter yang sama seperti halaman Monitoring Kepatuhan
+        $query = Pasien::with(['user', 'master']);
 
-    if ($request->filter_bulan) {
-        $query->whereMonth('tanggal', date('m', strtotime($request->filter_bulan)))
-              ->whereYear('tanggal', date('Y', strtotime($request->filter_bulan)));
-    }
-
-    $data = $query->get();
-
-    // 2. Tentukan nama file
-    $fileName = 'Laporan_Kepatuhan_ARV_' . date('Y-m-d') . '.csv';
-
-    // 3. Header untuk browser agar mengenali ini sebagai file unduhan
-    $headers = [
-        "Content-type"        => "text/csv",
-        "Content-Disposition" => "attachment; filename=$fileName",
-        "Pragma"              => "no-cache",
-        "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-        "Expires"             => "0"
-    ];
-
-    // 4. Proses pembuatan baris data
-    $callback = function() use($data) {
-        $file = fopen('php://output', 'w');
-        
-        // Header Kolom di Excel
-        fputcsv($file, ['No', 'Tanggal', 'Nama Pasien', 'No Reg HIV', 'Status Minum Obat', 'Jam']);
-
-        foreach ($data as $key => $row) {
-            fputcsv($file, [
-                $key + 1,
-                $row->tanggal,
-                $row->pasien->user->nama,
-                $row->pasien->pasienMaster->no_reg_hiv,
-                $row->status, // misal: Sudah Minum / Belum
-                $row->created_at->format('H:i')
-            ]);
+        // Filter: Pencarian berdasarkan nama (via relasi master)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('master', function ($q) use ($search) {
+                $q->where('nama', 'like', '%' . $search . '%');
+            });
         }
 
-        fclose($file);
-    };
+        // Filter: Status kepatuhan (exact match)
+        if ($request->filled('status')) {
+            $query->where('status_kepatuhan', $request->status);
+        }
 
-    return response()->stream($callback, 200, $headers);
-}
+        $data = $query->orderBy('created_at', 'desc')->get();
+
+        // 2. Tentukan nama file
+        $fileName = 'Laporan_Kepatuhan_Pasien_' . date('Y-m-d') . '.csv';
+
+        // 3. Header untuk browser agar mengenali file unduhan
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        // 4. Proses pembuatan baris data
+        $callback = function() use($data) {
+            $file = fopen('php://output', 'w');
+            
+            // Header Kolom di Excel
+            fputcsv($file, ['No', 'No Reg HIV', 'Nama Pasien', 'Status Kepatuhan', 'Tanggal Lahir', 'Alamat', 'Status Akun']);
+
+            foreach ($data as $key => $row) {
+                fputcsv($file, [
+                    $key + 1,
+                    $row->master->no_reg_hiv ?? '-',
+                    $row->master->nama ?? ($row->user->nama ?? '-'),
+                    ucfirst($row->status_kepatuhan ?? 'hijau'),
+                    $row->master->tgl_lahir ?? '-',
+                    $row->master->alamat ?? '-',
+                    ($row->user && $row->user->is_active) ? 'Aktif' : 'Non-aktif',
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }

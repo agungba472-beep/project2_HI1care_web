@@ -11,8 +11,10 @@ class RefillObat extends Model
     protected $fillable = [
         'pasien_id',
         'tanggal_refill',
+        'tanggal_diambil',
         'siklus_ke',
-        'status'
+        'status',
+        'admin_id'
     ];
 
     // INI TAMBAHANNYA

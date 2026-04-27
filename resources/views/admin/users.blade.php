@@ -211,11 +211,27 @@
                                 </td>
                                 <td>
                                     @if($user->role !== 'admin')
-                                    <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus akun {{ $user->nama }}?');" style="display:inline;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="hi-btn hi-btn-danger hi-btn-sm" title="Hapus"><i class="fas fa-trash"></i></button>
-                                    </form>
+                                    <div class="d-flex gap-1 flex-wrap">
+                                        @if($user->status_akun === 'pending')
+                                            <form action="{{ route('admin.users.approve', $user->id) }}" method="POST" style="display:inline;">
+                                                @csrf
+                                                <button type="submit" class="hi-btn hi-btn-success hi-btn-sm" title="Setujui" onclick="return confirm('Setujui akun {{ $user->nama }}?')">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+                                            <form action="{{ route('admin.users.reject', $user->id) }}" method="POST" style="display:inline;">
+                                                @csrf
+                                                <button type="submit" class="hi-btn hi-btn-warning hi-btn-sm" title="Tolak" onclick="return confirm('Tolak akun {{ $user->nama }}?')">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+                                        <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus akun {{ $user->nama }}?');" style="display:inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="hi-btn hi-btn-danger hi-btn-sm" title="Hapus"><i class="fas fa-trash"></i></button>
+                                        </form>
+                                    </div>
                                     @endif
                                 </td>
                             </tr>

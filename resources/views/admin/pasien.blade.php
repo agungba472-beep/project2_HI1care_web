@@ -10,7 +10,58 @@
     <div class="page-header fade-up">
         <i class="fas fa-notes-medical header-icon"></i>
         <h1>Monitoring Kepatuhan Pasien</h1>
-        <p>Pantau data pasien dan status kepatuhan pengobatan</p>
+        <p>Pantau data pasien, status kepatuhan pengobatan, dan ekspor laporan</p>
+    </div>
+
+    {{-- Alerts --}}
+    @if(session('success'))
+        <div class="hi-alert hi-alert-success fade-up">
+            <i class="fas fa-check-circle"></i> {{ session('success') }}
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="hi-alert hi-alert-danger fade-up">
+            <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
+        </div>
+    @endif
+
+    {{-- Filter & Ekspor Card --}}
+    <div class="hi-card fade-up" style="margin-bottom: 1.5rem;">
+        <div class="hi-card-header">
+            <span><i class="fas fa-filter"></i> Filter & Ekspor Data</span>
+        </div>
+        <div class="hi-card-body">
+            <form action="{{ route('admin.pasien.index') }}" method="GET">
+                <div class="row align-items-end">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label"><i class="fas fa-search me-1"></i>Cari Nama Pasien</label>
+                        <input type="text" class="form-control" name="search" value="{{ request('search') }}" placeholder="Ketik nama pasien...">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label"><i class="fas fa-heartbeat me-1"></i>Status Kepatuhan</label>
+                        <select class="form-select" name="status">
+                            <option value="">Semua Status</option>
+                            <option value="hijau" {{ request('status') == 'hijau' ? 'selected' : '' }}>🟢 Hijau (Patuh)</option>
+                            <option value="kuning" {{ request('status') == 'kuning' ? 'selected' : '' }}>🟡 Kuning (Waspada)</option>
+                            <option value="merah" {{ request('status') == 'merah' ? 'selected' : '' }}>🔴 Merah (Beresiko)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-5 mb-3">
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="submit" class="hi-btn hi-btn-primary hi-btn-sm">
+                                <i class="fas fa-search"></i> Cari
+                            </button>
+                            <a href="{{ route('admin.pasien.index') }}" class="hi-btn hi-btn-outline hi-btn-sm">
+                                <i class="fas fa-redo"></i> Reset
+                            </a>
+                            <a href="{{ route('admin.laporan.export', request()->query()) }}" class="hi-btn hi-btn-sm" style="background: #059669; color: #fff; border: none;">
+                                <i class="fas fa-file-excel"></i> Ekspor Excel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 
     {{-- Patient Table --}}
@@ -25,10 +76,11 @@
             <table class="hi-table">
                 <thead>
                     <tr>
-                        <th>No. Rekam Medis</th>
-                        <th>Nama Lengkap</th>
+                        <th>No. Reg HIV</th>
+                        <th>Nama Pasien</th>
+                        <th>Status Kepatuhan</th>
                         <th>Tanggal Lahir</th>
-                        <th>No. Telepon</th>
+                        <th>Alamat</th>
                         <th>Fase Pengobatan</th>
                         <th>Status Akun</th>
                         <th style="width: 140px;">Aksi</th>
@@ -37,22 +89,43 @@
                 <tbody>
                     @forelse($patients as $patient)
                     <tr>
-                        <td><span class="hi-code">{{ $patient->no_rekam_medis ?? '-' }}</span></td>
+                        <td><span class="hi-code">{{ $patient->master->no_reg_hiv ?? '-' }}</span></td>
                         <td>
                             <div class="d-flex align-items-center gap-2">
                                 @php
                                     $avatarColors = ['#0891b2','#0e7490','#059669','#2563eb','#7c3aed','#d97706'];
-                                    $pIni = strtoupper(substr($patient->nama_lengkap ?? 'P', 0, 1));
+                                    $pName = $patient->master->nama ?? ($patient->user->nama ?? 'P');
+                                    $pIni = strtoupper(substr($pName, 0, 1));
                                     $pCol = $avatarColors[ord($pIni) % count($avatarColors)];
                                 @endphp
                                 <div class="hi-avatar" style="background:{{ $pCol }}">{{ $pIni }}</div>
-                                <span style="font-weight: 600;">{{ $patient->nama_lengkap }}</span>
+                                <span style="font-weight: 600;">{{ $pName }}</span>
                             </div>
                         </td>
-                        <td style="font-size: 0.82rem; color: var(--text-secondary);">
-                            {{ \Carbon\Carbon::parse($patient->tanggal_lahir)->format('d/m/Y') }}
+                        <td>
+                            @php
+                                $statusKepatuhan = $patient->status_kepatuhan ?? 'hijau';
+                                $badgeClass = match($statusKepatuhan) {
+                                    'hijau' => 'hi-badge-success',
+                                    'kuning' => 'hi-badge-warning',
+                                    'merah' => 'hi-badge-danger',
+                                    default => 'hi-badge-info',
+                                };
+                                $statusLabel = match($statusKepatuhan) {
+                                    'hijau' => 'Patuh',
+                                    'kuning' => 'Waspada',
+                                    'merah' => 'Beresiko',
+                                    default => '-',
+                                };
+                            @endphp
+                            <span class="hi-badge {{ $badgeClass }}">
+                                <i class="fas fa-circle me-1" style="font-size: 0.5rem;"></i> {{ ucfirst($statusKepatuhan) }} — {{ $statusLabel }}
+                            </span>
                         </td>
-                        <td style="font-size: 0.82rem;">{{ $patient->no_telepon }}</td>
+                        <td style="font-size: 0.82rem; color: var(--text-secondary);">
+                            {{ $patient->master->tgl_lahir ? \Carbon\Carbon::parse($patient->master->tgl_lahir)->format('d/m/Y') : '-' }}
+                        </td>
+                        <td style="font-size: 0.82rem;">{{ $patient->master->alamat ?? '-' }}</td>
                         <td>
                             <span class="hi-badge hi-badge-info">{{ $patient->fase_pengobatan ?? 'Inisiasi' }}</span>
                         </td>
@@ -77,7 +150,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7">
+                        <td colspan="8">
                             <div class="hi-empty">
                                 <i class="fas fa-users"></i>
                                 <p>Belum ada data pasien terdaftar</p>

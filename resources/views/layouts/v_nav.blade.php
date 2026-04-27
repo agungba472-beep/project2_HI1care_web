@@ -41,10 +41,6 @@
                     <div class="sb-nav-link-icon"><i class="fas fa-book-medical"></i></div>
                     Modul Edukasi
                 </a>
-                <a class="nav-link" href="{{ route('admin.laporan.index') }}">
-                    <div class="sb-nav-link-icon"><i class="fas fa-chart-bar"></i></div>
-                    Laporan Pasien
-                </a>
 
                 {{-- === Logout === --}}
                 <div class="sb-sidenav-menu-heading">Akun</div>

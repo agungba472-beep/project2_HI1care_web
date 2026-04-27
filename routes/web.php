@@ -36,9 +36,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/pasien', [AdminPasienController::class, 'index'])->name('pasien.index');
     Route::post('/pasien/store', [AdminPasienController::class, 'store'])->name('pasien.store');
     Route::get('/refill', [AdminRefillController::class, 'index'])->name('refill.index');
+    Route::post('/refill/{id}/update-status', [AdminRefillController::class, 'updateStatus'])->name('refill.updateStatus');
     
     Route::get('/broadcast', [AdminBroadcastController::class, 'index'])->name('broadcast.index');
-    Route::post('/broadcast', [AdminBroadcastController::class, 'send'])->name('broadcast.send');
 
     Route::get('/laporan', [AdminLaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/export', [AdminLaporanController::class, 'exportExcel'])->name('laporan.export');

@@ -28,6 +28,11 @@ class Pasien extends Model
     }
 
     // RELASI FITUR
+    public function kepatuhan()
+    {
+        return $this->hasMany(Kepatuhan::class);
+    }
+
     public function alarm()
     {
         return $this->hasMany(AlarmArv::class);
@@ -38,7 +43,17 @@ class Pasien extends Model
         return $this->hasMany(DiaryHarian::class);
     }
 
+    public function diaryHarian()
+    {
+        return $this->hasMany(DiaryHarian::class);
+    }
+
     public function refill()
+    {
+        return $this->hasMany(RefillObat::class);
+    }
+
+    public function refillObat()
     {
         return $this->hasMany(RefillObat::class);
     }
