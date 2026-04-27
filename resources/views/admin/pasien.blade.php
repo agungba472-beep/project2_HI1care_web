@@ -90,6 +90,53 @@
         </div>
     </div>
 </div>
+
+{{-- Modal: Tambah Pasien --}}
+<div class="modal fade hi-modal" id="addPatientModal" tabindex="-1" aria-labelledby="addPatientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addPatientModalLabel"><i class="fas fa-user-plus me-2"></i>Tambah Data Pasien Baru</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('admin.pasien.store') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nama Lengkap</label>
+                            <input type="text" class="form-control" name="nama_lengkap" required placeholder="Nama sesuai KTP">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">No. Rekam Medis (Opsional)</label>
+                            <input type="text" class="form-control" name="no_rekam_medis" placeholder="Misal: RM-12345">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Username (Untuk Login App)</label>
+                            <input type="text" class="form-control" name="username" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" name="password" required minlength="6">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Tanggal Lahir</label>
+                            <input type="date" class="form-control" name="tanggal_lahir" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">No. Telepon</label>
+                            <input type="text" class="form-control" name="no_telepon" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="hi-btn hi-btn-outline" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="hi-btn hi-btn-primary"><i class="fas fa-save"></i> Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')

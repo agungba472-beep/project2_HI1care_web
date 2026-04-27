@@ -39,6 +39,50 @@ class AdminPasienController extends Controller
     }
 
     /**
+     * Menambahkan data pasien baru (Akun + Profil).
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nama_lengkap' => 'required|string|max:255',
+            'username' => 'required|string|unique:users,username|max:255',
+            'password' => 'required|string|min:6',
+            'tanggal_lahir' => 'required|date',
+            'no_telepon' => 'required|string|max:20',
+            'no_rekam_medis' => 'nullable|string|max:50',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // 1. Buat Akun User untuk Login
+            $user = User::create([
+                'nama' => $request->nama_lengkap,
+                'username' => $request->username,
+                'password' => Hash::make($request->password),
+                'role' => 'pasien',
+                'status_akun' => 'aktif'
+            ]);
+
+            // 2. Buat Profil Pasien
+            Pasien::create([
+                'user_id' => $user->id,
+                'nama_lengkap' => $request->nama_lengkap,
+                'no_rekam_medis' => $request->no_rekam_medis,
+                'tanggal_lahir' => $request->tanggal_lahir,
+                'no_telepon' => $request->no_telepon,
+                'fase_pengobatan' => 'Inisiasi' // Nilai default
+            ]);
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Data Pasien berhasil ditambahkan.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal menambahkan pasien: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Menonaktifkan akun pasien (Soft Delete atau Update Status).
      */
     public function toggleStatus($id)

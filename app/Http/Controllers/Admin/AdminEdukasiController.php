@@ -18,16 +18,22 @@ class AdminEdukasiController extends Controller
         $request->validate([
             'judul' => 'required|string|max:255',
             'konten' => 'required|string',
+            'cover' => 'nullable|image|mimes:jpeg,png,jpg|max:2048' // Validasi gambar
         ]);
+
+        $coverPath = null;
+        if ($request->hasFile('cover')) {
+            // Simpan gambar ke storage/app/public/edukasi_covers
+            $coverPath = $request->file('cover')->store('edukasi_covers', 'public');
+        }
 
         ModulEdukasi::create([
             'judul' => $request->judul,
+            'cover' => $coverPath,
             'konten' => $request->konten,
-            // Jika ada field 'penulis_id' atau 'admin_id' di database Anda, tambahkan di sini:
-            // 'admin_id' => auth()->user()->id 
         ]);
 
-        return redirect()->back()->with('success', 'Modul edukasi berhasil ditambahkan!');
+        return redirect()->back()->with('success', 'Modul edukasi beserta cover berhasil ditambahkan!');
     }
 
     public function destroy($id)

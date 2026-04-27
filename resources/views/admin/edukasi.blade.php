@@ -92,12 +92,17 @@
                 <h5 class="modal-title" id="addEdukasiModalLabel"><i class="fas fa-plus-circle me-2"></i>Tambah Modul Edukasi Baru</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="{{ route('admin.edukasi.store') }}" method="POST">
+            <form action="{{ route('admin.edukasi.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="judul" class="form-label">Judul Artikel / Edukasi</label>
                         <input type="text" class="form-control" id="judul" name="judul" required placeholder="Contoh: Pentingnya Minum ARV Tepat Waktu">
+                    </div>
+                    <div class="mb-3">
+                        <label for="cover" class="form-label">Cover / Gambar Edukasi (Opsional)</label>
+                        <input type="file" class="form-control" id="cover" name="cover" accept="image/*">
+                        <small class="text-muted">Format: JPG, PNG. Maksimal: 2MB.</small>
                     </div>
                     <div class="mb-3">
                         <label for="konten" class="form-label">Isi Konten</label>

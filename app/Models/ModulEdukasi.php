@@ -8,5 +8,5 @@ class ModulEdukasi extends Model
 {
     protected $table = 'modul_edukasi';
 
-    protected $fillable = ['judul','konten'];
+    protected $fillable = ['judul', 'cover', 'konten'];
 }
