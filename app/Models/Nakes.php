@@ -27,5 +27,10 @@ class Nakes extends Model
     {
         return $this->hasMany(Konsultasi::class);
     }
+
+    public function jadwal()
+    {
+        return $this->hasMany(JadwalNakes::class);
+    }
 }
 

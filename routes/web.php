@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\AdminRefillController;
 use App\Http\Controllers\Admin\AdminLaporanController;
 use App\Http\Controllers\Admin\AdminBroadcastController;
 use App\Http\Controllers\Admin\AdminEdukasiController;
+use App\Http\Controllers\Admin\AdminJadwalController;
 use App\Http\Controllers\Auth\WebAuthController;
 
 Route::get('/', function () {
@@ -47,6 +48,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/edukasi', [AdminEdukasiController::class, 'index'])->name('edukasi.index');
     Route::post('/edukasi', [AdminEdukasiController::class, 'store'])->name('edukasi.store');
     Route::delete('/edukasi/{id}', [AdminEdukasiController::class, 'destroy'])->name('edukasi.destroy');
+
+    Route::get('/jadwal', [AdminJadwalController::class, 'index'])->name('jadwal.index');
+    Route::post('/jadwal', [AdminJadwalController::class, 'store'])->name('jadwal.store');
+    Route::delete('/jadwal/{id}', [AdminJadwalController::class, 'destroy'])->name('jadwal.destroy');
 
     Route::get('/pasien/{id}', [AdminPasienController::class, 'show'])->name('pasien.show');
 });

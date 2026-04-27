@@ -15,11 +15,25 @@ class AdminUserController extends Controller
 {
     public function index()
     {
-        $nakes = Nakes::with('user')->get();
-        $pasienMaster = PasienMaster::all();
-        $users = User::all();
+        // Tab 1: Pendaftar baru yang menunggu verifikasi
+        $pendingUsers = User::where('status_akun', 'pending')
+                            ->orderBy('created_at', 'desc')
+                            ->get();
 
-        return view('admin.users', compact('nakes', 'pasienMaster', 'users'));
+        // Tab 2: Data master pasien (whitelist)
+        $pasienMaster = PasienMaster::orderBy('created_at', 'desc')->get();
+
+        // Tab 3: Tenaga kesehatan
+        $nakes = Nakes::with('user')->get();
+
+        // Tab 4: Pasien aktif (yang sudah diverifikasi)
+        $activePatients = Pasien::with(['user', 'master'])
+                            ->whereHas('user', function ($q) {
+                                $q->where('status_akun', 'aktif');
+                            })
+                            ->get();
+
+        return view('admin.users', compact('pendingUsers', 'pasienMaster', 'nakes', 'activePatients'));
     }
 
     public function indexNakes()

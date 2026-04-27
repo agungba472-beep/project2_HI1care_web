@@ -41,6 +41,10 @@
                     <div class="sb-nav-link-icon"><i class="fas fa-book-medical"></i></div>
                     Modul Edukasi
                 </a>
+                <a class="nav-link" href="{{ route('admin.jadwal.index') }}">
+                    <div class="sb-nav-link-icon"><i class="fas fa-calendar-alt"></i></div>
+                    Jadwal Nakes
+                </a>
 
                 {{-- === Logout === --}}
                 <div class="sb-sidenav-menu-heading">Akun</div>
