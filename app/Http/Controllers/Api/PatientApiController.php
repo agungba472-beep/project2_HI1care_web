@@ -99,7 +99,7 @@ class PatientApiController extends Controller
         $alarm = AlarmArv::create([
             'pasien_id' => $pasien->id,
             'waktu' => $request->waktu,
-            'status' => 'aktif',
+            'status' => 'belum',
             'tanggal' => $request->tanggal ?? now()->toDateString(),
         ]);
 
@@ -450,7 +450,7 @@ class PatientApiController extends Controller
         }
 
         // Update status alarm
-        $alarm->update(['status' => 'diminum']);
+        $alarm->update(['status' => 'sudah']);
 
         // Catat juga ke tabel kepatuhan
         Kepatuhan::create([
