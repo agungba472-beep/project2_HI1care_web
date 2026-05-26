@@ -11,70 +11,67 @@ class AdminLaporanController extends Controller
 {
     public function index(Request $request)
     {
-        // Contoh Pengambilan Data Rekapitulasi (Card Ringkasan)
         $totalPasien = Pasien::count();
-        $totalRefillSelesai = RefillObat::where('status', 'approved')->count(); // Sesuaikan status dengan database-mu
+        $totalRefillSelesai = RefillObat::where('status', 'selesai')->count(); 
         
-        // Mengambil data lengkap untuk tabel laporan 
-        // (Bisa kamu tambahkan filter tanggal nantinya menggunakan $request)
-        $dataLaporan = Pasien::with(['master', 'user', 'refill'])->get();
+        $dataLaporan = Pasien::with(['master', 'user', 'refill'])->orderBy('created_at', 'desc')->get();
 
         return view('admin.laporan', compact('totalPasien', 'totalRefillSelesai', 'dataLaporan'));
     }
+
+    // 1. FITUR EXCEL (CSV)
     public function exportExcel(Request $request)
     {
-        // 1. Query pasien dengan filter yang sama seperti halaman Monitoring Kepatuhan
-        $query = Pasien::with(['user', 'master']);
+        $dataLaporan = Pasien::with(['master', 'user', 'refill'])->orderBy('created_at', 'desc')->get();
+        $fileName = "Laporan_Kepatuhan_ODHA_" . date('Y-m-d') . ".csv";
 
-        // Filter: Pencarian berdasarkan nama (via relasi master)
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->whereHas('master', function ($q) use ($search) {
-                $q->where('nama', 'like', '%' . $search . '%');
-            });
-        }
-
-        // Filter: Status kepatuhan (exact match)
-        if ($request->filled('status')) {
-            $query->where('status_kepatuhan', $request->status);
-        }
-
-        $data = $query->orderBy('created_at', 'desc')->get();
-
-        // 2. Tentukan nama file
-        $fileName = 'Laporan_Kepatuhan_Pasien_' . date('Y-m-d') . '.csv';
-
-        // 3. Header untuk browser agar mengenali file unduhan
-        $headers = [
+        $headers = array(
             "Content-type"        => "text/csv",
             "Content-Disposition" => "attachment; filename=$fileName",
             "Pragma"              => "no-cache",
             "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
             "Expires"             => "0"
-        ];
+        );
 
-        // 4. Proses pembuatan baris data
-        $callback = function() use($data) {
+        $columns = array('No', 'No. Reg HIV', 'Nama Pasien', 'Tanggal Lahir', 'Status Kepatuhan', 'Siklus Refill Terakhir');
+
+        $callback = function() use($dataLaporan, $columns) {
             $file = fopen('php://output', 'w');
-            
-            // Header Kolom di Excel
-            fputcsv($file, ['No', 'No Reg HIV', 'Nama Pasien', 'Status Kepatuhan', 'Tanggal Lahir', 'Alamat', 'Status Akun']);
+            fputcsv($file, $columns);
 
-            foreach ($data as $key => $row) {
-                fputcsv($file, [
-                    $key + 1,
-                    $row->master->no_reg_hiv ?? '-',
-                    $row->master->nama ?? ($row->user->nama ?? '-'),
-                    ucfirst($row->status_kepatuhan ?? 'hijau'),
-                    $row->master->tgl_lahir ?? '-',
-                    $row->master->alamat ?? '-',
-                    ($row->user && $row->user->is_active) ? 'Aktif' : 'Non-aktif',
-                ]);
+            foreach ($dataLaporan as $index => $pasien) {
+                $lastRefill = $pasien->refill->sortByDesc('siklus_ke')->first();
+                $row['No']  = $index + 1;
+                $row['No. Reg HIV'] = $pasien->master->no_reg_hiv ?? '-';
+                $row['Nama Pasien'] = $pasien->master->nama ?? ($pasien->user->nama ?? '-');
+                $row['Tanggal Lahir'] = $pasien->master->tgl_lahir ?? '-';
+                $row['Status Kepatuhan'] = strtoupper($pasien->status_kepatuhan ?? 'HIJAU');
+                $row['Siklus Refill Terakhir'] = $lastRefill ? 'Siklus ke-' . $lastRefill->siklus_ke : 'Belum Pernah';
+
+                fputcsv($file, array($row['No'], $row['No. Reg HIV'], $row['Nama Pasien'], $row['Tanggal Lahir'], $row['Status Kepatuhan'], $row['Siklus Refill Terakhir']));
             }
-
             fclose($file);
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    // 2. FITUR CETAK PRINT / PDF
+    public function cetakPrint(Request $request)
+    {
+        $dataLaporan = Pasien::with(['master', 'user', 'refill'])->orderBy('created_at', 'desc')->get();
+        return view('admin.laporan_cetak', compact('dataLaporan'));
+    }
+
+    // 3. FITUR UNDUH WORD (.doc)
+    public function exportWord(Request $request)
+    {
+        $dataLaporan = Pasien::with(['master', 'user', 'refill'])->orderBy('created_at', 'desc')->get();
+        $fileName = "Laporan_Kepatuhan_ODHA_" . date('Y-m-d') . ".doc";
+        
+        header("Content-type: application/vnd.ms-word");
+        header("Content-Disposition: attachment;Filename={$fileName}");
+        
+        return view('admin.laporan_cetak', compact('dataLaporan'));
     }
 }

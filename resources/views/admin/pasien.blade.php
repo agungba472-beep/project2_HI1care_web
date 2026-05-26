@@ -57,6 +57,12 @@
                             <a href="{{ route('admin.laporan.export', request()->query()) }}" class="hi-btn hi-btn-sm" style="background: #059669; color: #fff; border: none;">
                                 <i class="fas fa-file-excel"></i> Ekspor Excel
                             </a>
+                            <a href="{{ route('admin.laporan.print', request()->query()) }}" class="hi-btn hi-btn-sm" style="background: #2563eb; color: #fff; border: none;">
+                                <i class="fas fa-print"></i> Cetak
+                            </a>
+                            <a href="{{ route('admin.laporan.word', request()->query()) }}" class="hi-btn hi-btn-sm" style="background: #7c3aed; color: #fff; border: none;">
+                                <i class="fas fa-file-word"></i> Ekspor Word
+                            </a>
                         </div>
                     </div>
                 </div>

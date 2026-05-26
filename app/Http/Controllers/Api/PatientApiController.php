@@ -256,9 +256,9 @@ class PatientApiController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Data pasien tidak ditemukan'], 404);
         }
 
-        // Cek apakah ada refill pending
+        // Cek apakah ada refill yang statusnya masih menunggu (UBAH DARI 'pending')
         $pending = RefillObat::where('pasien_id', $pasien->id)
-            ->where('status', 'pending')
+            ->where('status', 'menunggu') 
             ->first();
 
         if ($pending) {
@@ -268,14 +268,14 @@ class PatientApiController extends Controller
             ], 422);
         }
 
-        // Hitung siklus berikutnya
+        // Hitung siklus berikutnya secara otomatis
         $lastSiklus = RefillObat::where('pasien_id', $pasien->id)->max('siklus_ke') ?? 0;
 
         $refill = RefillObat::create([
             'pasien_id' => $pasien->id,
             'tanggal_refill' => now()->toDateString(),
             'siklus_ke' => $lastSiklus + 1,
-            'status' => 'pending',
+            'status' => 'menunggu', // UBAH DARI 'pending'
         ]);
 
         return response()->json([

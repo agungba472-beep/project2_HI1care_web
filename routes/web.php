@@ -42,7 +42,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/broadcast', [AdminBroadcastController::class, 'index'])->name('broadcast.index');
 
     Route::get('/laporan', [AdminLaporanController::class, 'index'])->name('laporan.index');
-    Route::get('/laporan/export', [AdminLaporanController::class, 'exportExcel'])->name('laporan.export');
+    Route::get('/laporan/export', [App\Http\Controllers\Admin\AdminLaporanController::class, 'exportExcel'])->name('admin.laporan.export');
+Route::get('/laporan/print', [App\Http\Controllers\Admin\AdminLaporanController::class, 'cetakPrint'])->name('admin.laporan.print');
+Route::get('/laporan/word', [App\Http\Controllers\Admin\AdminLaporanController::class, 'exportWord'])->name('admin.laporan.word');
     Route::post('/broadcast/store', [AdminBroadcastController::class, 'store'])->name('broadcast.store');
 
     Route::get('/edukasi', [AdminEdukasiController::class, 'index'])->name('edukasi.index');
