@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Broadcast;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\AdminController;
@@ -24,6 +25,9 @@ Route::post('/register-pasien', [AuthController::class, 'registerPasien']); // R
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth:sanctum')->group(function () {
+
+    // Broadcasting auth (untuk Pusher private channels)
+    Broadcast::routes();
 
     // Auth & Profile
     Route::get('/user', [ProfileController::class, 'index']);
@@ -78,7 +82,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/consultations/{id}/respond', [NakesApiController::class, 'respondConsultation']);
         
         // Live Chat
-       Route::get('/nakes/active-chats', [ChatController::class, 'getActiveChats']);
+        Route::get('/active-chats', [ChatController::class, 'getActiveChats']);
         // Monitoring Pasien
         Route::get('/patients', [NakesApiController::class, 'getMyPatients']);
         Route::get('/patients/{id}', [NakesApiController::class, 'getPatientDetail']);
