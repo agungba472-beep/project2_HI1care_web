@@ -48,7 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/alarms/settings', [PatientApiController::class, 'saveAlarmSettings']);
         Route::post('/alarms/{id}/taken', [PatientApiController::class, 'markAlarmAsTaken']);
         Route::post('/kepatuhan/track', [PatientApiController::class, 'trackKepatuhan']);
-        Route::delete('/patient/alarms/{id}', [PatientApiController::class, 'deleteAlarm']);
+        Route::delete('/alarms/{id}', [PatientApiController::class, 'deleteAlarm']);
 
         // Diary Harian (FR-P04)
         Route::get('/diary', [PatientApiController::class, 'getDiary']);
@@ -66,20 +66,23 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/my-consultations', [PatientApiController::class, 'getMyConsultations']);
     });
 
-    // --- FITUR NAKES (MOBILE) ---
+    // ==========================================
+    // RUTE KHUSUS TENAGA KESEHATAN (NAKES)
+    // ==========================================
     Route::prefix('nakes')->group(function () {
-        // Monitoring Pasien (FR-T02)
-        Route::get('/my-patients', [NakesApiController::class, 'getMyPatients']);
-        Route::get('/patient/{id}/details', [NakesApiController::class, 'getPatientDetails']);
-
-        // Konsultasi (FR-T03)
-        Route::get('/consultations', [NakesApiController::class, 'getConsultations']);
-        Route::post('/consultations/{id}/update-status', [NakesApiController::class, 'updateConsultationStatus']);
-
-        // Chat Nakes — Daftar sesi chat aktif
-        Route::get('/active-chats', [ChatController::class, 'getActiveChats']);
+        Route::get('/dashboard', [NakesApiController::class, 'getDashboard']);
+        
+        // Manajemen Konsultasi
+        Route::get('/consultations/pending', [NakesApiController::class, 'getPendingConsultations']);
+        Route::post('/consultations/{id}/respond', [NakesApiController::class, 'respondConsultation']);
+        
+        // Live Chat
+        Route::get('/chats/active', [NakesApiController::class, 'getActiveChats']);
+        
+        // Monitoring Pasien
+        Route::get('/patients', [NakesApiController::class, 'getMyPatients']);
+        Route::get('/patients/{id}', [NakesApiController::class, 'getPatientDetail']);
     });
-
     // --- CHAT API (Shared: Pasien & Nakes) ---
     Route::prefix('chat')->group(function () {
         Route::get('/{konsultasiId}/messages', [ChatController::class, 'getMessages']);

@@ -127,7 +127,8 @@ class PatientApiController extends Controller
         AlarmArv::where('pasien_id', $pasien->id)
             ->where('status', 'belum')
             ->where('tanggal', '>=', now()->toDateString())
-            ->delete();
+            // ->delete()
+            ;
 
         $isEveryday = filter_var($request->is_everyday, FILTER_VALIDATE_BOOLEAN);
         $startDate = \Carbon\Carbon::parse($request->tanggal);

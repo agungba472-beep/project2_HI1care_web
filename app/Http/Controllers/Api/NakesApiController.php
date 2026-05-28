@@ -6,157 +6,152 @@ use App\Http\Controllers\Controller;
 use App\Models\Konsultasi;
 use App\Models\Nakes;
 use App\Models\Pasien;
+use App\Models\Chat;
 use Illuminate\Http\Request;
 
 class NakesApiController extends Controller
 {
     /**
-     * Helper: Ambil data nakes dari user yang login.
+     * Helper: Ambil data Nakes dari user yang login
      */
     private function getNakes()
     {
         return Nakes::where('user_id', auth()->id())->first();
     }
 
-    /**
-     * Melihat daftar semua pasien aktif beserta status kepatuhan terakhir (FR-T02).
-     */
-    public function getMyPatients()
+    // ===================================================================
+    // 1. DASHBOARD NAKES
+    // ===================================================================
+    public function getDashboard()
     {
-        $user = auth()->user();
+        $nakes = $this->getNakes();
+        if (!$nakes) return response()->json(['status' => 'error', 'message' => 'Data Nakes tidak ditemukan'], 404);
 
-        if ($user->role !== 'nakes') {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Akses ditolak. Hanya nakes yang bisa mengakses fitur ini.'
-            ], 403);
-        }
+        $today = now()->toDateString();
 
-        $patients = Pasien::with([
-            'user:id,nama,username,status_akun',
-            'master:id,no_reg_hiv,nama',
-            'kepatuhan' => function ($q) {
-                $q->latest('last_update')->take(1);
-            }
-        ])->get();
-
-        return response()->json(['status' => 'success', 'data' => $patients]);
-    }
-
-    /**
-     * Detail lengkap satu pasien: profil, kepatuhan, diary, alarm, refill (FR-T02).
-     */
-    public function getPatientDetails($id)
-    {
-        $user = auth()->user();
-
-        if ($user->role !== 'nakes') {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Akses ditolak'
-            ], 403);
-        }
-
-        $pasien = Pasien::with([
-            'user:id,nama,username',
-            'master',
-            'kepatuhan' => function ($q) {
-                $q->latest('last_update')->take(30);
-            },
-            'diaryHarian' => function ($q) {
-                $q->latest('tanggal')->take(10);
-            },
-            'alarm' => function ($q) {
-                $q->orderBy('waktu');
-            },
-            'refillObat' => function ($q) {
-                $q->latest('tanggal_refill')->take(5);
-            },
-        ])->find($id);
-
-        if (!$pasien) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Data pasien tidak ditemukan'
-            ], 404);
-        }
-
-        // Hitung statistik kepatuhan
-        $totalKepatuhan = $pasien->kepatuhan->count();
-        $diminum = $pasien->kepatuhan->where('status', 'diminum')->count();
-        $persentase = $totalKepatuhan > 0 ? round(($diminum / $totalKepatuhan) * 100, 1) : 0;
+        // Hitung statistik
+        $pendingCount = Konsultasi::where('nakes_id', $nakes->id)->where('status', 'pending')->count();
+        $todayKonsultasi = Konsultasi::where('nakes_id', $nakes->id)
+            ->where('tanggal', $today)
+            ->whereIn('status', ['diterima', 'dijadwalkan'])
+            ->with(['pasien.user', 'pasien.master'])
+            ->orderBy('waktu')
+            ->get();
 
         return response()->json([
             'status' => 'success',
             'data' => [
-                'pasien' => $pasien,
-                'statistik_kepatuhan' => [
-                    'total_log' => $totalKepatuhan,
-                    'diminum' => $diminum,
-                    'terlewat' => $pasien->kepatuhan->where('status', 'terlewat')->count(),
-                    'tunda' => $pasien->kepatuhan->where('status', 'tunda')->count(),
-                    'persentase_kepatuhan' => $persentase,
+                'profil' => $nakes->load('user'),
+                'statistik' => [
+                    'menunggu_persetujuan' => $pendingCount,
+                    'jadwal_hari_ini' => $todayKonsultasi->count(),
                 ],
+                'jadwal_hari_ini' => $todayKonsultasi
             ]
         ]);
     }
 
-    /**
-     * Daftar konsultasi milik nakes yang login (FR-T03).
-     */
-    public function getConsultations()
+    // ===================================================================
+    // 2. MANAJEMEN KONSULTASI (PERMINTAAN MASUK)
+    // ===================================================================
+    public function getPendingConsultations()
     {
         $nakes = $this->getNakes();
+        if (!$nakes) return response()->json(['status' => 'error', 'message' => 'Akses ditolak'], 403);
 
-        if (!$nakes) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Data nakes tidak ditemukan'
-            ], 404);
-        }
+        $permintaan = Konsultasi::where('nakes_id', $nakes->id)
+            ->where('status', 'pending')
+            ->with(['pasien.user', 'pasien.master'])
+            ->orderBy('tanggal')
+            ->orderBy('waktu')
+            ->get();
 
-        $konsultasi = Konsultasi::where('nakes_id', $nakes->id)
-            ->with(['pasien.user:id,nama', 'pasien.master:id,no_reg_hiv,nama'])
-            ->orderByDesc('tanggal')
-            ->paginate(10);
-
-        return response()->json(['status' => 'success', 'data' => $konsultasi]);
+        return response()->json(['status' => 'success', 'data' => $permintaan]);
     }
 
-    /**
-     * Update status konsultasi (terima/tolak/selesai) oleh nakes.
-     */
-    public function updateConsultationStatus(Request $request, $id)
+    public function respondConsultation(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:diterima,ditolak,selesai,batal',
+            'status' => 'required|in:diterima,ditolak'
         ]);
 
         $nakes = $this->getNakes();
-        if (!$nakes) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Data nakes tidak ditemukan'
-            ], 404);
-        }
+        $konsultasi = Konsultasi::where('id', $id)->where('nakes_id', $nakes->id)->first();
 
-        $konsultasi = Konsultasi::where('id', $id)
-            ->where('nakes_id', $nakes->id)
-            ->first();
-
-        if (!$konsultasi) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Konsultasi tidak ditemukan'
-            ], 404);
-        }
+        if (!$konsultasi) return response()->json(['status' => 'error', 'message' => 'Data konsultasi tidak ditemukan'], 404);
 
         $konsultasi->update(['status' => $request->status]);
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Status konsultasi berhasil diperbarui',
+            'message' => 'Status konsultasi berhasil diperbarui menjadi ' . $request->status,
             'data' => $konsultasi
         ]);
+    }
+
+    // ===================================================================
+    // 3. DAFTAR KONSULTASI AKTIF (UNTUK LIVE CHAT)
+    // ===================================================================
+    public function getActiveChats()
+    {
+        $nakes = $this->getNakes();
+        if (!$nakes) return response()->json(['status' => 'error', 'message' => 'Akses ditolak'], 403);
+        
+        $chats = Konsultasi::where('nakes_id', $nakes->id)
+            ->whereIn('status', ['diterima', 'dijadwalkan'])
+            ->with(['pasien.user', 'pasien.master', 'latestChat'])
+            ->orderByDesc('updated_at')
+            ->get();
+
+        return response()->json(['status' => 'success', 'data' => $chats]);
+    }
+
+    // ===================================================================
+    // 4. MONITORING PASIEN (KEPATUHAN, DIARY, REFILL)
+    // ===================================================================
+    public function getMyPatients()
+    {
+        $nakes = $this->getNakes();
+        if (!$nakes) return response()->json(['status' => 'error', 'message' => 'Akses ditolak'], 403);
+        
+        // Ambil ID pasien yang pernah / sedang konsultasi dengan Nakes ini
+        $pasienIds = Konsultasi::where('nakes_id', $nakes->id)->pluck('pasien_id')->unique();
+
+        $pasiens = Pasien::whereIn('id', $pasienIds)
+            ->with(['user', 'master'])
+            ->get()
+            ->map(function ($p) {
+                // Ambil status kepatuhan terbarunya
+                $p->kepatuhan_terbaru = $p->status_kepatuhan;
+                return $p;
+            });
+
+        return response()->json(['status' => 'success', 'data' => $pasiens]);
+    }
+
+    public function getPatientDetail($id)
+    {
+        $nakes = $this->getNakes();
+        if (!$nakes) return response()->json(['status' => 'error', 'message' => 'Akses ditolak'], 403);
+        
+        // Validasi apakah Nakes ini berhak melihat data pasien ini
+        $pernahKonsultasi = Konsultasi::where('nakes_id', $nakes->id)->where('pasien_id', $id)->exists();
+        if (!$pernahKonsultasi) {
+            return response()->json(['status' => 'error', 'message' => 'Anda tidak memiliki akses ke rekam medis pasien ini'], 403);
+        }
+
+        $pasien = Pasien::where('id', $id)
+            ->with([
+                'user', 
+                'master',
+                'diary' => function($q) { $q->orderByDesc('tanggal')->take(10); },
+                'refill' => function($q) { $q->orderByDesc('tanggal_refill')->take(5); },
+                'kepatuhan' => function($q) { $q->latest('last_update')->take(30); }
+            ])
+            ->first();
+
+        if (!$pasien) return response()->json(['status' => 'error', 'message' => 'Data pasien tidak ditemukan'], 404);
+
+        return response()->json(['status' => 'success', 'data' => $pasien]);
     }
 }
