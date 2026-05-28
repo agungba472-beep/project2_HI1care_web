@@ -51,6 +51,7 @@ class PatientApiController extends Controller
                 'recent_edukasi' => ModulEdukasi::latest()->take(3)->get(),
                 'alarm_hari_ini' => AlarmArv::where('pasien_id', $pasien->id)
                     ->whereDate('tanggal', now()->toDateString())
+                    ->where('status', 'belum')
                     ->get(),
                 'kepatuhan_terbaru' => $pasien->kepatuhan->first(),
             ]
@@ -197,7 +198,7 @@ class PatientApiController extends Controller
         if ($recentLogs->isEmpty()) return;
 
         $total = $recentLogs->count();
-        $diminum = $recentLogs->where('status', 'diminum','tepat waktu')->count();
+        $diminum = $recentLogs->whereIn('status', ['diminum', 'tepat waktu'])->count();
         $persentase = ($diminum / $total) * 100;
 
         if ($persentase >= 80) $status = 'hijau';
