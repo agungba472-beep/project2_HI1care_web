@@ -126,7 +126,7 @@ class ChatController extends Controller
                 ];
             });
 
-        return response()->json([
+       return response()->json([
             'status' => 'success',
             'data' => [
                 'konsultasi' => [
@@ -135,6 +135,10 @@ class ChatController extends Controller
                     'status'      => $konsultasi->status,
                     'nakes_nama'  => $konsultasi->nakes?->user?->nama ?? $konsultasi->nakes?->nama ?? 'Nakes',
                     'nakes_profesi' => $konsultasi->nakes?->profesi ?? '-',
+                    'pasien_nama'  => $konsultasi->pasien?->user?->nama ?? $konsultasi->pasien?->master?->nama ?? 'Pasien',
+                    
+                    // --- GANTI BARIS INI (Pakai variabel $nakes yang sudah ada) ---
+                    'current_role' => $nakes ? 'nakes' : 'pasien',
                 ],
                 'messages' => $messages,
             ]

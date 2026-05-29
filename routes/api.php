@@ -9,7 +9,6 @@ use App\Http\Controllers\Api\PatientApiController;
 use App\Http\Controllers\Api\NakesApiController;
 use App\Http\Controllers\Api\ChatController;
 
-
 /*
 |--------------------------------------------------------------------------
 | Public Routes
@@ -27,7 +26,7 @@ Route::post('/register-pasien', [AuthController::class, 'registerPasien']); // R
 Route::middleware('auth:sanctum')->group(function () {
 
     // Broadcasting auth (untuk Pusher private channels)
-    Broadcast::routes();
+    Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
     // Auth & Profile
     Route::get('/user', [ProfileController::class, 'index']);
