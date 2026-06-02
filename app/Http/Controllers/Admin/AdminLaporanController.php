@@ -60,7 +60,7 @@ class AdminLaporanController extends Controller
     public function cetakPrint(Request $request)
     {
         $dataLaporan = Pasien::with(['master', 'user', 'refill'])->orderBy('created_at', 'desc')->get();
-        return view('admin.laporan_cetak', compact('dataLaporan'));
+        return view('admin.laporan.print', compact('dataLaporan'));
     }
 
     // 3. FITUR UNDUH WORD (.doc)
@@ -72,6 +72,6 @@ class AdminLaporanController extends Controller
         header("Content-type: application/vnd.ms-word");
         header("Content-Disposition: attachment;Filename={$fileName}");
         
-        return view('admin.laporan_cetak', compact('dataLaporan'));
+        return view('admin.laporan.export', compact('dataLaporan'));
     }
 }

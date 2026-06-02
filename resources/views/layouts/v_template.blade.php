@@ -22,9 +22,9 @@
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
         <!-- Navbar Brand-->
         <a class="navbar-brand ps-3 d-flex align-items-center" href="#">
-            <img src="{{ asset('images/logo_polsub.png') }}" alt="Logo" class="logo me-2">
-            <span class="fw-bold">HI1Care</span>
-        </a>
+    <img src="{{ asset('template/assets/img/logo_hi1care.png') }}" alt="Logo" class="me-2" style="height: 45px !important; max-height: 45px !important; width: auto !important; object-fit: contain;">
+    <span class="fw-bold fs-4">HI!Care</span>
+</a>
 
         <!-- Sidebar Toggle -->
         <button class="btn btn-link btn-sm order-1 order-lg-0 ms-2" id="sidebarToggle" href="#!">

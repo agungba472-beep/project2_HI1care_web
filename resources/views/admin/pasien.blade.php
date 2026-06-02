@@ -46,25 +46,25 @@
                             <option value="merah" {{ request('status') == 'merah' ? 'selected' : '' }}>🔴 Merah (Beresiko)</option>
                         </select>
                     </div>
-                    <div class="col-md-5 mb-3">
-                        <div class="d-flex gap-2 flex-wrap">
-                            <button type="submit" class="hi-btn hi-btn-primary hi-btn-sm">
-                                <i class="fas fa-search"></i> Cari
-                            </button>
-                            <a href="{{ route('admin.pasien.index') }}" class="hi-btn hi-btn-outline hi-btn-sm">
-                                <i class="fas fa-redo"></i> Reset
-                            </a>
-                            <a href="{{ route('admin.laporan.export', request()->query()) }}" class="hi-btn hi-btn-sm" style="background: #059669; color: #fff; border: none;">
-                                <i class="fas fa-file-excel"></i> Ekspor Excel
-                            </a>
-                            <a href="{{ route('admin.laporan.print', request()->query()) }}" class="hi-btn hi-btn-sm" style="background: #2563eb; color: #fff; border: none;">
-                                <i class="fas fa-print"></i> Cetak
-                            </a>
-                            <a href="{{ route('admin.laporan.word', request()->query()) }}" class="hi-btn hi-btn-sm" style="background: #7c3aed; color: #fff; border: none;">
-                                <i class="fas fa-file-word"></i> Ekspor Word
-                            </a>
-                        </div>
-                    </div>
+                    <div class="col-md-12 mb-3">
+    <div class="d-flex gap-2 flex-wrap">
+        <button type="submit" class="hi-btn hi-btn-primary hi-btn-sm">
+            <i class="fas fa-search"></i> Cari
+        </button>
+        <a href="{{ route('admin.pasien.index') }}" class="hi-btn hi-btn-outline hi-btn-sm">
+            <i class="fas fa-redo"></i> Reset
+        </a>
+        <a href="{{ route('admin.laporan.export', request()->query()) }}" class="hi-btn hi-btn-sm" style="background: #059669; color: #fff; border: none;">
+            <i class="fas fa-file-excel"></i> Ekspor Excel
+        </a>
+        <a href="{{ route('admin.laporan.cetak', request()->query()) }}" class="hi-btn hi-btn-sm" style="background: #2563eb; color: #fff; border: none;">
+            <i class="fas fa-print"></i> Ekspor PDF
+        </a>
+        <a href="{{ route('admin.laporan.word', request()->query()) }}" class="hi-btn hi-btn-sm" style="background: #7c3aed; color: #fff; border: none;">
+            <i class="fas fa-file-word"></i> Ekspor Word
+        </a>
+    </div>
+</div>
                 </div>
             </form>
         </div>
