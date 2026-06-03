@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 
 class AdminDashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         // Statistik Ringkasan
         $stats = [
@@ -27,15 +27,19 @@ class AdminDashboardController extends Controller
             'total_broadcast' => Broadcast::count(),
         ];
 
-        // Data Grafik Tren Kepatuhan
+        // JIKA PERMINTAAN DATANG DARI AJAX (REAL-TIME UPDATE)
+        if ($request->ajax()) {
+            return response()->json([
+                'stats' => $stats
+            ]);
+        }
+
+        // Data Grafik Tren Kepatuhan (Hanya untuk load pertama kali)
         $chartData = Pasien::select('status_kepatuhan', DB::raw('count(*) as total'))
             ->groupBy('status_kepatuhan')
             ->get();
 
-        // Pasien terbaru
         $recentPasien = Pasien::with('user', 'master')->latest()->take(5)->get();
-
-        // Refill terbaru
         $recentRefill = RefillObat::with('pasien.user')->latest()->take(5)->get();
 
         return view('admin.dashboard', compact('stats', 'chartData', 'recentPasien', 'recentRefill'));

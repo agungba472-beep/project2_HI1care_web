@@ -696,28 +696,20 @@
     </div>
 </div>
 
-{{-- ===== Chart.js ===== --}}
+{{-- ===== Chart.js & AJAX Real-Time ===== --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // ===== Doughnut Chart =====
+    // 1. Inisialisasi Grafik
     const ctx = document.getElementById('complianceChart').getContext('2d');
-
-    const hijau = {{ $stats['kepatuhan_hijau'] }};
-    const kuning = {{ $stats['kepatuhan_kuning'] }};
-    const merah = {{ $stats['kepatuhan_merah'] }};
-
-    new Chart(ctx, {
+    
+    let chartInstance = new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: ['Patuh (Hijau)', 'Peringatan (Kuning)', 'Drop-out (Merah)'],
             datasets: [{
-                data: [hijau, kuning, merah],
-                backgroundColor: [
-                    '#059669',
-                    '#d97706',
-                    '#dc2626'
-                ],
+                data: [{{ $stats['kepatuhan_hijau'] }}, {{ $stats['kepatuhan_kuning'] }}, {{ $stats['kepatuhan_merah'] }}],
+                backgroundColor: ['#059669', '#d97706', '#dc2626'],
                 borderColor: '#ffffff',
                 borderWidth: 3,
                 hoverOffset: 8,
@@ -729,32 +721,13 @@ document.addEventListener('DOMContentLoaded', function () {
             responsive: true,
             cutout: '68%',
             plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 16,
-                        usePointStyle: true,
-                        pointStyleWidth: 10,
-                        font: { family: 'Inter', size: 12, weight: '500' },
-                        color: '#64748b'
-                    }
-                },
-                tooltip: {
-                    backgroundColor: '#1e293b',
-                    padding: 12,
-                    cornerRadius: 8,
-                    titleFont: { family: 'Inter', weight: '600' },
-                    bodyFont: { family: 'Inter' },
-                }
+                legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyleWidth: 10, font: { family: 'Inter', size: 12, weight: '500' }, color: '#64748b' } }
             },
-            animation: {
-                animateRotate: true,
-                duration: 1200,
-            }
+            animation: { animateRotate: true, duration: 1200 }
         }
     });
 
-    // ===== Number Counter Animation =====
+    // 2. Animasi Angka Awal
     document.querySelectorAll('.stat-number').forEach(el => {
         const target = parseInt(el.textContent);
         if (isNaN(target) || target === 0) return;
@@ -763,13 +736,61 @@ document.addEventListener('DOMContentLoaded', function () {
         const step = Math.max(1, Math.ceil(target / 35));
         const timer = setInterval(() => {
             current += step;
-            if (current >= target) {
-                current = target;
-                clearInterval(timer);
-            }
+            if (current >= target) { current = target; clearInterval(timer); }
             el.textContent = current;
         }, 30);
     });
+
+    // ==============================================================
+    // 3. MESIN REAL-TIME: Mengambil Data Baru Setiap 5 Detik
+    // ==============================================================
+    function fetchLiveDashboardData() {
+        fetch(window.location.href, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.stats) {
+                // Update Angka di Kartu Atas
+                document.querySelector('.card-patients .stat-number').textContent = data.stats.total_pasien;
+                document.querySelector('.card-pending .stat-number').textContent = data.stats.pending_verifikasi;
+                document.querySelector('.card-compliant .stat-number').textContent = data.stats.kepatuhan_hijau;
+                document.querySelector('.card-risk .stat-number').textContent = data.stats.kepatuhan_merah;
+                document.querySelector('.card-refill .stat-number').textContent = data.stats.total_refill;
+                document.querySelector('.card-broadcast .stat-number').textContent = data.stats.total_broadcast;
+
+                // Update Grafik Donat secara mulus
+                chartInstance.data.datasets[0].data = [
+                    data.stats.kepatuhan_hijau,
+                    data.stats.kepatuhan_kuning,
+                    data.stats.kepatuhan_merah
+                ];
+                chartInstance.update();
+
+                // Update Progress Bar Persentase
+                const total = Math.max(data.stats.kepatuhan_hijau + data.stats.kepatuhan_kuning + data.stats.kepatuhan_merah, 1);
+                const pctHijau = Math.round((data.stats.kepatuhan_hijau / total) * 100);
+                const pctKuning = Math.round((data.stats.kepatuhan_kuning / total) * 100);
+                const pctMerah = Math.round((data.stats.kepatuhan_merah / total) * 100);
+
+                const bars = document.querySelectorAll('.compliance-bar-wrap');
+                if(bars.length >= 3) {
+                    bars[0].querySelector('.bar-fill').style.width = pctHijau + '%';
+                    bars[0].querySelector('.bar-value').textContent = pctHijau + '%';
+                    
+                    bars[1].querySelector('.bar-fill').style.width = pctKuning + '%';
+                    bars[1].querySelector('.bar-value').textContent = pctKuning + '%';
+                    
+                    bars[2].querySelector('.bar-fill').style.width = pctMerah + '%';
+                    bars[2].querySelector('.bar-value').textContent = pctMerah + '%';
+                }
+            }
+        })
+        .catch(error => console.log("Gagal menarik data live:", error));
+    }
+
+    // Jalankan mesin setiap 5000 milidetik (5 detik)
+    setInterval(fetchLiveDashboardData, 5000);
 });
 </script>
 @endsection

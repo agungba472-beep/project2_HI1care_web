@@ -135,9 +135,9 @@ class ChatController extends Controller
                     'status'      => $konsultasi->status,
                     'nakes_nama'  => $konsultasi->nakes?->user?->nama ?? $konsultasi->nakes?->nama ?? 'Nakes',
                     'nakes_profesi' => $konsultasi->nakes?->profesi ?? '-',
+                    'nakes_user_id' => $konsultasi->nakes?->user_id,
                     'pasien_nama'  => $konsultasi->pasien?->user?->nama ?? $konsultasi->pasien?->master?->nama ?? 'Pasien',
-                    
-                    // --- GANTI BARIS INI (Pakai variabel $nakes yang sudah ada) ---
+                    'pasien_user_id' => $konsultasi->pasien?->user_id,
                     'current_role' => $nakes ? 'nakes' : 'pasien',
                 ],
                 'messages' => $messages,

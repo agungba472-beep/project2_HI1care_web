@@ -43,17 +43,29 @@ class PatientApiController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Data pasien tidak ditemukan'], 404);
         }
 
+        $jadwalHariIni = AlarmArv::where('pasien_id', $pasien->id)
+            ->whereDate('tanggal', now()->toDateString())
+            ->orderBy('waktu', 'asc')
+            ->get()
+            ->map(function($alarm) {
+                return [
+                    'id'    => $alarm->id,
+                    'jam'   => \Carbon\Carbon::parse($alarm->waktu)->format('H:i'),
+                    'judul' => 'Jadwal Minum Obat ARV 💊',
+                    'nada'  => $alarm->nada_dering ?? 'Default',
+                    'status'=> $alarm->status
+                ];
+            });
+
         return response()->json([
             'status' => 'success',
             'data' => [
                 'user' => $user,
                 'pasien_info' => $pasien,
                 'recent_edukasi' => ModulEdukasi::latest()->take(3)->get(),
-                'alarm_hari_ini' => AlarmArv::where('pasien_id', $pasien->id)
-                    ->whereDate('tanggal', now()->toDateString())
-                    ->where('status', 'belum')
-                    ->get(),
+                'jadwal_hari_ini' => $jadwalHariIni,
                 'kepatuhan_terbaru' => $pasien->kepatuhan->first(),
+                'status_kepatuhan' => $pasien->status_kepatuhan ?? 'hijau',
             ]
         ]);
     }
@@ -319,6 +331,7 @@ class PatientApiController extends Controller
                     'id'            => $k->id,
                     'nakes_nama'    => $k->nakes?->user?->nama ?? $k->nakes?->nama ?? 'Nakes',
                     'nakes_profesi' => $k->nakes?->profesi ?? '-',
+                    'nakes_user_id' => $k->nakes?->user?->id,
                     'tanggal'       => $k->tanggal,
                     'waktu'         => $k->waktu,
                     'status'        => $k->status,

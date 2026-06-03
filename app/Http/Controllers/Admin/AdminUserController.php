@@ -114,29 +114,100 @@ class AdminUserController extends Controller
     }
     public function destroy($id)
     {
-        // 1. Cari data user berdasarkan ID
-        $user = User::findOrFail($id);
+        // 1. JURUS ULTIMATE: Bius penjaga MySQL agar tidak rewel!
+        \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
 
-        // 2. Hapus data berelasi (Opsional, tapi sangat disarankan jika database tidak otomatis Cascade)
-        if ($user->role === 'nakes') {
-            Nakes::where('user_id', $user->id)->delete();
-        } elseif ($user->role === 'pasien') {
-            Pasien::where('user_id', $user->id)->delete();
+        $user = User::withTrashed()->findOrFail($id);
+        
+        if ($user->role === 'pasien') {
+            // withTrashed() memastikan data yang sudah "soft delete" tetap tertangkap
+            $pasien = Pasien::withTrashed()->where('user_id', $user->id)->first();
+            
+            if ($pasien) {
+                $pasienId = $pasien->id;
+                $masterId = $pasien->pasien_master_id;
+                
+                $konsultasiIds = \App\Models\Konsultasi::withTrashed()->where('pasien_id', $pasienId)->pluck('id');
+                if ($konsultasiIds->isNotEmpty()) {
+                    DB::table('chat')->whereIn('konsultasi_id', $konsultasiIds)->delete();
+                }
+                
+                // Sapu bersih menggunakan forceDelete()
+                \App\Models\Konsultasi::withTrashed()->where('pasien_id', $pasienId)->forceDelete();
+                \App\Models\RefillObat::withTrashed()->where('pasien_id', $pasienId)->forceDelete();
+                \App\Models\Kepatuhan::withTrashed()->where('pasien_id', $pasienId)->forceDelete();
+                \App\Models\DiaryHarian::withTrashed()->where('pasien_id', $pasienId)->forceDelete();
+                \App\Models\AlarmArv::withTrashed()->where('pasien_id', $pasienId)->forceDelete();
+
+                $pasien->forceDelete();
+                
+                // if ($masterId) {
+                //     \App\Models\PasienMaster::withTrashed()->where('id', $masterId)->forceDelete();
+                // }
+            }
+        } 
+        elseif ($user->role === 'nakes') {
+            $nakes = Nakes::withTrashed()->where('user_id', $user->id)->first();
+            
+            if ($nakes) {
+                $nakesId = $nakes->id;
+                
+                $konsultasiIds = \App\Models\Konsultasi::withTrashed()->where('nakes_id', $nakesId)->pluck('id');
+                if ($konsultasiIds->isNotEmpty()) {
+                    DB::table('chat')->whereIn('konsultasi_id', $konsultasiIds)->delete();
+                }
+                
+                \App\Models\Konsultasi::withTrashed()->where('nakes_id', $nakesId)->forceDelete();
+                \App\Models\JadwalNakes::where('nakes_id', $nakesId)->delete(); // Hapus jadwal nakes juga
+                
+                $nakes->forceDelete();
+            }
         }
 
-        // 3. Hapus akun utamanya
-        $user->delete();
+        // Hapus akun utama
+        $user->forceDelete();
 
-        // 4. Kembali ke halaman sebelumnya dengan pesan sukses
-        return redirect()->back()->with('success', 'Akun pengguna dan data terkait berhasil dihapus permanen!');
+        // 2. Bangunkan kembali penjaga MySQL
+        \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
+
+        return redirect()->back()->with('success', 'Akun berhasil dihapus total menggunakan Jurus Ultimate!');
     }
-
     public function destroyMaster($id)
     {
         $master = PasienMaster::findOrFail($id);
+        
+        // Cari semua pasien yang terhubung dengan master ini menggunakan DB Facade
+        $pasiens = DB::table('pasien')->where('pasien_master_id', $master->id)->get();
+        $pasienIds = $pasiens->pluck('id')->toArray();
+        $userIds = $pasiens->pluck('user_id')->toArray();
+        
+        if (!empty($pasienIds)) {
+            // Hapus Chat terkait konsultasi pasien ini
+            $konsultasiIds = DB::table('konsultasi')->whereIn('pasien_id', $pasienIds)->pluck('id');
+            if ($konsultasiIds->isNotEmpty()) {
+                DB::table('chat')->whereIn('konsultasi_id', $konsultasiIds)->delete();
+            }
+            
+            // Hapus semua data medis
+            DB::table('konsultasi')->whereIn('pasien_id', $pasienIds)->delete();
+            DB::table('refill_obat')->whereIn('pasien_id', $pasienIds)->delete();
+            DB::table('kepatuhan')->whereIn('pasien_id', $pasienIds)->delete();
+            DB::table('diary_harian')->whereIn('pasien_id', $pasienIds)->delete();
+            DB::table('alarm_arv')->whereIn('pasien_id', $pasienIds)->delete();
+            
+            // Hapus relasi pasien
+            DB::table('pasien')->whereIn('id', $pasienIds)->delete();
+            
+            // Hapus akun user yang menggunakan master ini agar tidak menjadi yatim piatu
+            if (!empty($userIds)) {
+                DB::table('users')->whereIn('id', $userIds)->delete();
+            }
+        }
+
+        // Terakhir baru hapus masternya dengan aman
         $master->delete();
 
-        return redirect()->back()->with('success', 'Data master pasien berhasil dihapus.');
+        return redirect()->back()->with('success', 'Data master pasien beserta seluruh riwayat dan akun terkait berhasil dibersihkan.');
     }
     public function resetPassword(Request $request, $id)
 {
