@@ -45,6 +45,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // --- FITUR PASIEN (MOBILE) ---
     Route::prefix('patient')->group(function () {
         Route::get('/dashboard', [PatientApiController::class, 'getDashboard']);
+        Route::get('/notifications', [PatientApiController::class, 'getNotifications']);
 
         // Alarm & Kepatuhan (FR-P03, FR-P05)
         Route::get('/alarms', [PatientApiController::class, 'getAlarms']);

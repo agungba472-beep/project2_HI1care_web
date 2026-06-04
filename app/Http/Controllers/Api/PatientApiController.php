@@ -57,6 +57,10 @@ class PatientApiController extends Controller
                 ];
             });
 
+        $unreadNotifCount = \App\Models\Notifikasi::where('user_id', $user->id)
+            ->where('status', 'belum_dibaca')
+            ->count();
+
         return response()->json([
             'status' => 'success',
             'data' => [
@@ -66,6 +70,7 @@ class PatientApiController extends Controller
                 'jadwal_hari_ini' => $jadwalHariIni,
                 'kepatuhan_terbaru' => $pasien->kepatuhan->first(),
                 'status_kepatuhan' => $pasien->status_kepatuhan ?? 'hijau',
+                'unread_notif_count' => $unreadNotifCount
             ]
         ]);
     }
@@ -357,8 +362,25 @@ class PatientApiController extends Controller
 
     public function getNotifications()
     {
-        $notifikasi = Notifikasi::where('user_id', auth()->id())->orderByDesc('created_at')->paginate(15);
-        return response()->json(['status' => 'success', 'data' => $notifikasi]);
+        $user = auth()->user();
+        $notifikasi = \App\Models\Notifikasi::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function($notif) {
+                return [
+                    'id'         => $notif->id,
+                    'judul'      => $notif->judul,
+                    'pesan'      => $notif->pesan,
+                    'is_read'    => $notif->status === 'dibaca' ? 1 : 0,
+                    'status'     => $notif->status,
+                    'created_at' => $notif->created_at ? $notif->created_at->diffForHumans() : 'Baru saja'
+                ];
+            });
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => $notifikasi
+        ]);
     }
 
 
