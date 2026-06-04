@@ -58,6 +58,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Diary Harian (FR-P04)
         Route::get('/diary', [PatientApiController::class, 'getDiary']);
         Route::post('/diary', [PatientApiController::class, 'storeDiary']);
+        Route::delete('/diary/{id}', [PatientApiController::class, 'destroyDiary']);
 
         // Refill Obat (FR-P07)
         Route::get('/refill-history', [PatientApiController::class, 'getRefillHistory']);

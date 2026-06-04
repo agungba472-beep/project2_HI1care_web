@@ -257,6 +257,20 @@ class PatientApiController extends Controller
         return response()->json(['status' => 'success', 'message' => 'Diary berhasil disimpan', 'data' => $diary], 201);
     }
 
+    public function destroyDiary($id)
+    {
+        $pasien = $this->getPasien();
+        if (!$pasien) return response()->json(['status' => 'error', 'message' => 'Data pasien tidak ditemukan'], 404);
+
+        $diary = DiaryHarian::where('id', $id)->where('pasien_id', $pasien->id)->first();
+        if (!$diary) {
+            return response()->json(['status' => 'error', 'message' => 'Catatan tidak ditemukan'], 404);
+        }
+        
+        $diary->delete();
+        return response()->json(['status' => 'success', 'message' => 'Diary berhasil dihapus']);
+    }
+
 
     // ===================================================================
     // REFILL OBAT (FR-P07)

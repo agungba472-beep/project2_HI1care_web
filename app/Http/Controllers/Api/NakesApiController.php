@@ -37,6 +37,11 @@ class NakesApiController extends Controller
             ->with(['pasien.user', 'pasien.master'])
             ->orderBy('waktu')
             ->get();
+            
+        // Hitung metrik baru
+        $totalPasien = \App\Models\Pasien::count(); 
+        $perluPerhatian = \App\Models\Pasien::whereIn('status_kepatuhan', ['merah', 'kuning'])->count();
+        $pesanBaru = \App\Models\Notifikasi::where('user_id', $nakes->user_id)->where('status', 'belum_dibaca')->count();
 
         return response()->json([
             'status' => 'success',
@@ -45,6 +50,9 @@ class NakesApiController extends Controller
                 'statistik' => [
                     'menunggu_persetujuan' => $pendingCount,
                     'jadwal_hari_ini' => $todayKonsultasi->count(),
+                    'total_pasien' => $totalPasien,
+                    'perlu_perhatian' => $perluPerhatian,
+                    'pesan_baru' => $pesanBaru,
                 ],
                 'jadwal_hari_ini' => $todayKonsultasi
             ]
