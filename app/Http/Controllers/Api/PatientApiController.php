@@ -57,7 +57,7 @@ class PatientApiController extends Controller
                 ];
             });
 
-        $unreadNotifCount = \App\Models\Notifikasi::where('user_id', $user->id)
+        $unreadNotifCount = Notifikasi::where('user_id', $user->id)
             ->where('status', 'belum_dibaca')
             ->count();
 
@@ -363,7 +363,7 @@ class PatientApiController extends Controller
     public function getNotifications()
     {
         $user = auth()->user();
-        $notifikasi = \App\Models\Notifikasi::where('user_id', $user->id)
+        $notifikasi = Notifikasi::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function($notif) {
