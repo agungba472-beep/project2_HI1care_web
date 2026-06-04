@@ -203,33 +203,38 @@ class ChatController extends Controller
         }
 
         // ==========================================================
-        // LOGIKA NOTIFIKASI YANG DIPERBAIKI (PASTI MASUK)
+        // FIX NOTIFIKASI CHAT: AMBIL USER ID SECARA LANGSUNG & AKURAT
         // ==========================================================
         $targetUserId = null;
 
         if ($senderType === 'pasien') {
-            // Jika Pasien nge-chat, notif ke Nakes
-            $targetUserId = $konsultasi->nakes?->user_id;
+            // Jika pasien yang kirim, cari User ID milik Nakes
+            if ($konsultasi->nakes_id) {
+                $nakes_model = \App\Models\Nakes::find($konsultasi->nakes_id);
+                $targetUserId = $nakes_model ? $nakes_model->user_id : null;
+            }
         } else if ($senderType === 'nakes') {
-            // Jika Nakes nge-chat, PASTI notif ke Pasien
-            $targetUserId = $konsultasi->pasien?->user_id;
-            
-            // (Opsional & Pintar) Jika Nakes membalas, otomatis ubah chat_status jadi 'nakes'
+            // Jika nakes yang kirim, cari User ID milik Pasien
+            if ($konsultasi->pasien_id) {
+                $pasien_model = \App\Models\Pasien::find($konsultasi->pasien_id);
+                $targetUserId = $pasien_model ? $pasien_model->user_id : null;
+            }
+
+            // Otomatis set status ke nakes jika nakes membalas
             if ($konsultasi->chat_status !== 'nakes') {
                 $konsultasi->update(['chat_status' => 'nakes']);
             }
         }
 
-        // Buat baris notifikasi ke database
+        // Tembakkan ke tabel notifikasi jika target ditemukan
         if ($targetUserId) {
-            Notifikasi::create([
+            \App\Models\Notifikasi::create([
                 'user_id' => $targetUserId,
-                'judul'   => 'Pesan Baru',
-                'pesan'   => $senderType === 'pasien'
-                    ? 'Pasien mengirim pesan baru di sesi konsultasi.'
-                    : 'Nakes membalas pesan Anda di ruang chat.',
-                'tipe'    => 'chat',
-                'status'  => 'belum_dibaca' // WAJIB ADA: Agar titik merah di lonceng menyala!
+                'judul'   => $senderType === 'pasien' ? 'Pesan Pasien Baru' : 'Balasan Chat Nakes',
+                'pesan'   => $senderType === 'pasien' 
+                    ? 'Ada pesan baru masuk dari pasien di ruang konsultasi.' 
+                    : 'Nakes telah membalas chat Anda. Silakan periksa ruang konsultasi.',
+                'status'  => 'belum_dibaca' // Menyalakan titik merah lonceng
             ]);
         }
 

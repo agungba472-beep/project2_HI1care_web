@@ -15,7 +15,10 @@ class PasienMaster extends Model
         'nama',
         'tgl_lahir',
         'alamat',
-        'is_registered'
+        'is_registered',
+        'jenis_kelamin',
+        'berat_badan',
+        'tinggi_badan',
     ];
 
     public function pasien()

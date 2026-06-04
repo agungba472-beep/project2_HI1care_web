@@ -332,7 +332,80 @@
                                 </div>
                             </div>
                         </div>
+                        {{-- ===== Data Baru: Jenis Kelamin, No HP, Data Fisik ===== --}}
+                        <div class="col-md-6">
+                            <div class="profile-info-item">
+                                <div class="info-icon" style="background: #ede9fe; color: #7c3aed;">
+                                    <i class="fas fa-venus-mars"></i>
+                                </div>
+                                <div>
+                                    <div class="info-label">Jenis Kelamin</div>
+                                    <div class="info-value">
+                                        @if($patient->master->jenis_kelamin === 'L')
+                                            <i class="fas fa-mars me-1" style="color: #2563eb;"></i> Laki-laki
+                                        @elseif($patient->master->jenis_kelamin === 'P')
+                                            <i class="fas fa-venus me-1" style="color: #ec4899;"></i> Perempuan
+                                        @else
+                                            -
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="profile-info-item">
+                                <div class="info-icon" style="background: #dbeafe; color: #2563eb;">
+                                    <i class="fas fa-phone-alt"></i>
+                                </div>
+                                <div>
+                                    <div class="info-label">No. Handphone</div>
+                                    <div class="info-value">{{ $patient->user->no_hp ?? '-' }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="profile-info-item">
+                                <div class="info-icon" style="background: #fef3c7; color: #d97706;">
+                                    <i class="fas fa-weight"></i>
+                                </div>
+                                <div>
+                                    <div class="info-label">Berat / Tinggi Badan</div>
+                                    <div class="info-value">
+                                        {{ $patient->master->berat_badan ? $patient->master->berat_badan . ' kg' : '-' }}
+                                        &nbsp;/&nbsp;
+                                        {{ $patient->master->tinggi_badan ? $patient->master->tinggi_badan . ' cm' : '-' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="profile-info-item">
+                                <div class="info-icon" style="background: #d1fae5; color: #059669;">
+                                    <i class="fas fa-calculator"></i>
+                                </div>
+                                <div>
+                                    <div class="info-label">BMI (Body Mass Index)</div>
+                                    <div class="info-value">
+                                        @if($patient->master->berat_badan && $patient->master->tinggi_badan)
+                                            @php
+                                                $bmi = $patient->master->berat_badan / pow($patient->master->tinggi_badan / 100, 2);
+                                                $bmiFormatted = number_format($bmi, 1);
+                                                $bmiLabel = $bmi < 18.5 ? 'Underweight' : ($bmi < 25 ? 'Normal' : ($bmi < 30 ? 'Overweight' : 'Obese'));
+                                                $bmiColor = $bmi < 18.5 ? '#d97706' : ($bmi < 25 ? '#059669' : ($bmi < 30 ? '#d97706' : '#dc2626'));
+                                            @endphp
+                                            {{ $bmiFormatted }}
+                                            <span class="hi-badge" style="background: {{ $bmiColor }}15; color: {{ $bmiColor }}; font-size: 0.68rem; margin-left: 0.5rem;">
+                                                {{ $bmiLabel }}
+                                            </span>
+                                        @else
+                                            -
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
                 </div>
             </div>
         </div>

@@ -61,6 +61,12 @@ class ProfileController extends Controller
             'nama' => 'sometimes|string|max:255',
             'username' => 'sometimes|string|unique:users,username,' . $user->id,
             'password' => 'sometimes|string|min:6|confirmed',
+            'no_hp' => 'sometimes|string|max:20',
+            'alamat' => 'sometimes|string|max:500',
+            'tanggal_lahir' => 'sometimes|date',
+            'jenis_kelamin' => 'sometimes|in:L,P',
+            'berat_badan' => 'sometimes|numeric|min:1|max:300',
+            'tinggi_badan' => 'sometimes|numeric|min:30|max:300',
         ]);
 
         $updateData = [];
@@ -77,8 +83,37 @@ class ProfileController extends Controller
             $updateData['password'] = Hash::make($request->password);
         }
 
+        if ($request->has('no_hp')) {
+            $updateData['no_hp'] = $request->no_hp;
+        }
+
         if (!empty($updateData)) {
             $user->update($updateData);
+        }
+
+        // Update pasien_master fields if user is pasien
+        if ($user->role === 'pasien') {
+            $masterData = [];
+
+            if ($request->has('alamat')) {
+                $masterData['alamat'] = $request->alamat;
+            }
+            if ($request->has('tanggal_lahir')) {
+                $masterData['tgl_lahir'] = $request->tanggal_lahir;
+            }
+            if ($request->has('jenis_kelamin')) {
+                $masterData['jenis_kelamin'] = $request->jenis_kelamin;
+            }
+            if ($request->has('berat_badan')) {
+                $masterData['berat_badan'] = $request->berat_badan;
+            }
+            if ($request->has('tinggi_badan')) {
+                $masterData['tinggi_badan'] = $request->tinggi_badan;
+            }
+
+            if (!empty($masterData) && $user->pasien && $user->pasien->master) {
+                $user->pasien->master->update($masterData);
+            }
         }
 
         // Reload relasi
