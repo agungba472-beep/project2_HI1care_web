@@ -46,6 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('patient')->group(function () {
         Route::get('/dashboard', [PatientApiController::class, 'getDashboard']);
         Route::get('/notifications', [PatientApiController::class, 'getNotifications']);
+        Route::post('/notifications/mark-as-read', [PatientApiController::class, 'markNotificationsAsRead']);
 
         // Alarm & Kepatuhan (FR-P03, FR-P05)
         Route::get('/alarms', [PatientApiController::class, 'getAlarms']);
@@ -63,6 +64,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Refill Obat (FR-P07)
         Route::get('/refill-history', [PatientApiController::class, 'getRefillHistory']);
         Route::post('/refill/request', [PatientApiController::class, 'requestRefill']);
+        Route::post('/refill/{id}/photo', [PatientApiController::class, 'uploadRefillPhoto']);
 
         // Booking Konsultasi (FR-P08)
         Route::get('/nakes-schedules', [PatientApiController::class, 'getNakesSchedules']);

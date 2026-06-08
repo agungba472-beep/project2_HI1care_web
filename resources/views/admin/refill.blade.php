@@ -91,6 +91,7 @@
                         <th>Tgl Diambil</th>
                         <th>Siklus</th>
                         <th>Status</th>
+                        <th>Bukti Foto</th>
                         <th style="width: 200px;">Aksi</th>
                     </tr>
                 </thead>
@@ -156,6 +157,15 @@
                             </span>
                         </td>
                         <td>
+                            @if($refill->foto_bukti)
+                                <button type="button" class="hi-badge hi-badge-info" data-bs-toggle="modal" data-bs-target="#modalFotoRefill{{ $refill->id }}" style="border: none; background: var(--info); color: white;">
+                                    <i class="fas fa-image me-1"></i> Lihat Bukti
+                                </button>
+                            @else
+                                <span style="font-size: 0.72rem; color: var(--text-secondary);">Belum ada foto</span>
+                            @endif
+                        </td>
+                        <td>
                             <div class="d-flex gap-1 flex-wrap">
                                 @if($refill->status === 'menunggu')
                                     <form action="{{ route('admin.refill.updateStatus', $refill->id) }}" method="POST" style="display:inline;">
@@ -194,4 +204,27 @@
         </div>
     </div>
 </div>
+
+{{-- Modals --}}
+@foreach($requests as $refill)
+    @if($refill->foto_bukti)
+    <div class="modal fade" id="modalFotoRefill{{ $refill->id }}" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header" style="border-bottom: 1px solid #e2e8f0;">
+            <h5 class="modal-title fw-bold"><i class="fas fa-image me-2 text-primary"></i>Bukti Foto Refill</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center" style="background: var(--surface-light); padding: 1.5rem;">
+            <img src="{{ asset('storage/' . $refill->foto_bukti) }}" alt="Bukti Foto" class="img-fluid rounded shadow-sm" style="max-height: 75vh; object-fit: contain;">
+          </div>
+          <div class="modal-footer" style="border-top: none;">
+            <button type="button" class="hi-btn hi-btn-outline" data-bs-dismiss="modal">Tutup Layar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    @endif
+@endforeach
+
 @endsection

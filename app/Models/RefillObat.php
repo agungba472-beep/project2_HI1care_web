@@ -14,6 +14,7 @@ class RefillObat extends Model
         'tanggal_diambil',
         'siklus_ke',
         'status',
+        'foto_bukti',
         'admin_id'
     ];
 

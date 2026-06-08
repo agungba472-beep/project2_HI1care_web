@@ -511,6 +511,7 @@
                                     <th style="width: 50px;">No</th>
                                     <th>Tanggal & Waktu</th>
                                     <th>Status Kepatuhan</th>
+                                    <th>Bukti Foto</th>
                                     <th>Keterangan</th>
                                 </tr>
                             </thead>
@@ -545,6 +546,15 @@
                                             <i class="fas {{ $kBadge['icon'] }} me-1"></i> {{ $kBadge['label'] }}
                                         </span>
                                     </td>
+                                    <td>
+                                        @if($record->foto_bukti)
+                                            <button type="button" class="hi-badge hi-badge-info" data-bs-toggle="modal" data-bs-target="#modalFotoKepatuhan{{ $record->id }}" style="border: none; background: var(--info); color: white;">
+                                                <i class="fas fa-image me-1"></i> Lihat Bukti
+                                            </button>
+                                        @else
+                                            <span style="font-size: 0.75rem; color: #94a3b8; font-style: italic;">Tidak ada foto</span>
+                                        @endif
+                                    </td>
                                     <td style="font-size: 0.82rem; color: var(--text-secondary);">
                                         @if($record->status === 'hijau')
                                             Obat diminum tepat waktu
@@ -557,7 +567,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="4">
+                                    <td colspan="5">
                                         <div class="hi-empty">
                                             <i class="fas fa-clipboard-list"></i>
                                             <p>Belum ada data riwayat kepatuhan untuk pasien ini.</p>
@@ -748,4 +758,27 @@
         </div>
     </div>
 </div>
+
+{{-- Modals --}}
+@foreach($patient->kepatuhan as $record)
+    @if($record->foto_bukti)
+    <div class="modal fade" id="modalFotoKepatuhan{{ $record->id }}" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header" style="border-bottom: 1px solid #e2e8f0;">
+            <h5 class="modal-title fw-bold"><i class="fas fa-image me-2 text-primary"></i>Bukti Foto Minum Obat</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center" style="background: var(--surface-light); padding: 1.5rem;">
+            <img src="{{ asset('storage/' . $record->foto_bukti) }}" alt="Bukti Foto" class="img-fluid rounded shadow-sm" style="max-height: 75vh; object-fit: contain;">
+          </div>
+          <div class="modal-footer" style="border-top: none;">
+            <button type="button" class="hi-btn hi-btn-outline" data-bs-dismiss="modal">Tutup Layar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    @endif
+@endforeach
+
 @endsection

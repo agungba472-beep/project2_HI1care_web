@@ -42,7 +42,19 @@ class AdminPasienController extends Controller
      */
     public function show($id)
     {
-        $patient = Pasien::with(['user', 'master', 'kepatuhan', 'diaryHarian', 'refillObat'])->findOrFail($id);
+        $patient = Pasien::with([
+            'user', 
+            'master', 
+            'kepatuhan' => function($query) {
+                $query->latest('last_update');
+            }, 
+            'diaryHarian' => function($query) {
+                $query->latest('tanggal');
+            }, 
+            'refillObat' => function($query) {
+                $query->latest();
+            }
+        ])->findOrFail($id);
         
         // Kalkulasi persentase kepatuhan berdasarkan status hijau (patuh)
         $totalDoses = $patient->kepatuhan->count();

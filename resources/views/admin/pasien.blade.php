@@ -168,6 +168,29 @@
             </table>
         </div>
     </div>
+
+    {{-- Keterangan Indikator Kepatuhan --}}
+    <div class="hi-card fade-up" style="margin-top: 1.5rem;">
+        <div class="hi-card-body">
+            <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.75rem;">
+                <i class="fas fa-info-circle" style="color: var(--primary);"></i> Keterangan Indikator Kepatuhan ARV:
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 2;">
+                <div class="d-flex align-items-start gap-2 mb-2">
+                    <span class="hi-badge hi-badge-success" style="min-width: 75px; text-align: center;">🟢 Hijau</span>
+                    <span><strong>Kepatuhan Tinggi (&gt; 95%):</strong> Pasien meminum obat tepat waktu secara konsisten. Target supresi virus optimal.</span>
+                </div>
+                <div class="d-flex align-items-start gap-2 mb-2">
+                    <span class="hi-badge hi-badge-warning" style="min-width: 75px; text-align: center;">🟡 Kuning</span>
+                    <span><strong>Kepatuhan Sedang (80% - 95%):</strong> Beberapa kali terlambat atau melewatkan dosis. Membutuhkan pengingat edukasi tambahan.</span>
+                </div>
+                <div class="d-flex align-items-start gap-2">
+                    <span class="hi-badge hi-badge-danger" style="min-width: 75px; text-align: center;">🔴 Merah</span>
+                    <span><strong>Kepatuhan Kritis (&lt; 80%):</strong> Risiko putus obat (Lost to Follow-Up) sangat tinggi. Nakes harus segera melakukan tindakan proaktif/menghubungi pasien.</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 {{-- Modal: Tambah Pasien --}}

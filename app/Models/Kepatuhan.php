@@ -11,7 +11,7 @@ class Kepatuhan extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['pasien_id','status','last_update'];
+    protected $fillable = ['pasien_id','status','last_update','foto_bukti'];
 
     public function pasien()
     {

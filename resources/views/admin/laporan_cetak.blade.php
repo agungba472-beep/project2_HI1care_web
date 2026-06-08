@@ -81,7 +81,7 @@
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
                     <td class="text-center">{{ $pasien->master->no_reg_hiv ?? '-' }}</td>
-                    <td>{{ $pasien->master->nama ?? ($pasien->user->name ?? ($pasien->user->nama ?? '-')) }}</td>
+                    <td>{{ $pasien->master->nama ?? ($pasien->user->nama ?? '-') }}</td>
                     <td class="text-center">{{ $pasien->master->tgl_lahir ?? '-' }}</td>
                     <td class="text-center @if(!isset($isWord) || !$isWord) badge-kepatuhan {{ $kepatuhan }} @endif" style="font-weight: bold;">
                         {{ strtoupper($kepatuhan) }}

@@ -380,7 +380,7 @@
     <div class="welcome-banner fade-up">
         <div class="d-flex justify-content-between align-items-start">
             <div>
-                <h2>Selamat Datang, {{ auth()->user()->name ?? 'Admin' }}! 👋</h2>
+                <h2>Selamat Datang, {{ auth()->user()->nama ?? 'Admin' }}! 👋</h2>
                 <p>Dashboard monitoring kesehatan pasien HI!-CARE</p>
                 <div class="welcome-date">
                     <i class="fas fa-calendar-alt me-1"></i>
@@ -524,6 +524,27 @@
                             <span class="bar-value">{{ $pctMerah }}%</span>
                         </div>
                     </div>
+
+                    {{-- Keterangan Indikator Kepatuhan --}}
+                    <div class="mt-3 p-3" style="background: #f8fafc; border-radius: 10px; border: 1px solid var(--border);">
+                        <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">
+                            <i class="fas fa-info-circle" style="color: var(--primary);"></i> Keterangan Indikator Kepatuhan ARV:
+                        </div>
+                        <div style="font-size: 0.72rem; color: var(--text-secondary); line-height: 1.8;">
+                            <div class="d-flex align-items-start gap-2 mb-1">
+                                <span class="badge-status badge-hijau" style="min-width: 65px; text-align: center; font-size: 0.68rem;">🟢 Hijau</span>
+                                <span><strong>Kepatuhan Tinggi (&gt; 95%)</strong> — Pasien meminum obat tepat waktu secara konsisten. Target supresi virus optimal.</span>
+                            </div>
+                            <div class="d-flex align-items-start gap-2 mb-1">
+                                <span class="badge-status badge-kuning" style="min-width: 65px; text-align: center; font-size: 0.68rem;">🟡 Kuning</span>
+                                <span><strong>Kepatuhan Sedang (80% - 95%)</strong> — Beberapa kali terlambat/melewatkan dosis. Perlu pengingat edukasi.</span>
+                            </div>
+                            <div class="d-flex align-items-start gap-2">
+                                <span class="badge-status badge-merah" style="min-width: 65px; text-align: center; font-size: 0.68rem;">🔴 Merah</span>
+                                <span><strong>Kepatuhan Kritis (&lt; 80%)</strong> — Risiko putus obat (Lost to Follow-Up) tinggi. Nakes harus segera menghubungi pasien.</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -553,12 +574,12 @@
                                     <div class="d-flex align-items-center gap-2">
                                         @php
                                             $avatarColors = ['#0891b2','#0e7490','#059669','#2563eb','#7c3aed','#d97706'];
-                                            $initial = strtoupper(substr($pasien->user->name ?? 'P', 0, 1));
+                                            $initial = strtoupper(substr($pasien->user->nama ?? 'P', 0, 1));
                                             $color = $avatarColors[ord($initial) % count($avatarColors)];
                                         @endphp
                                         <div class="avatar-sm" style="background: {{ $color }};">{{ $initial }}</div>
                                         <div>
-                                            <div style="font-weight: 600; color: var(--text-primary);">{{ $pasien->user->name ?? '-' }}</div>
+                                            <div style="font-weight: 600; color: var(--text-primary);">{{ $pasien->user->nama ?? '-' }}</div>
                                             <div style="font-size: 0.72rem; color: var(--text-secondary);">ID: {{ $pasien->id }}</div>
                                         </div>
                                     </div>
@@ -620,11 +641,11 @@
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
                                         @php
-                                            $rInitial = strtoupper(substr($refill->pasien->user->name ?? 'R', 0, 1));
+                                            $rInitial = strtoupper(substr($refill->pasien->user->nama ?? 'R', 0, 1));
                                             $rColor = $avatarColors[ord($rInitial) % count($avatarColors)];
                                         @endphp
                                         <div class="avatar-sm" style="background: {{ $rColor }};">{{ $rInitial }}</div>
-                                        <span style="font-weight: 600;">{{ $refill->pasien->user->name ?? '-' }}</span>
+                                        <span style="font-weight: 600;">{{ $refill->pasien->user->nama ?? '-' }}</span>
                                     </div>
                                 </td>
                                 <td>

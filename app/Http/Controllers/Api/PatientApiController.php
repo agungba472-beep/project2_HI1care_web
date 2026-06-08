@@ -94,8 +94,12 @@ class PatientApiController extends Controller
         return response()->json(['status' => 'success', 'data' => $alarms]);
     }
 
-    public function markAlarmAsTaken($id)
+    public function markAlarmAsTaken(Request $request, $id)
     {
+        $request->validate([
+            'foto_bukti' => 'nullable|image|max:5120' // Maksimal 5MB
+        ]);
+
         $pasien = $this->getPasien();
         
         if (!$pasien) {
@@ -110,17 +114,25 @@ class PatientApiController extends Controller
 
         $alarm->update(['status' => 'sudah']);
 
+        $fotoPath = null;
+        if ($request->hasFile('foto_bukti')) {
+            // Simpan foto ke folder storage/app/public/bukti dengan disk 'public'
+            $path = $request->file('foto_bukti')->store('bukti', 'public');
+            $fotoPath = $path;
+        }
+
         Kepatuhan::create([
             'pasien_id'   => $pasien->id,
             'status'      => 'diminum',
             'last_update' => now(),
+            'foto_bukti'  => $fotoPath,
         ]);
 
         $this->updateStatusKepatuhan($pasien);
 
         return response()->json([
             'status'  => 'success',
-            'message' => 'Obat berhasil ditandai sebagai diminum',
+            'message' => 'Obat berhasil ditandai sebagai diminum beserta foto bukti (jika ada)',
             'data'    => $alarm,
         ]);
     }
@@ -290,10 +302,12 @@ class PatientApiController extends Controller
         $pasien = $this->getPasien();
         if (!$pasien) return response()->json(['status' => 'error', 'message' => 'Data pasien tidak ditemukan'], 404);
 
-        $pending = RefillObat::where('pasien_id', $pasien->id)->where('status', 'menunggu')->first();
+        $pending = RefillObat::where('pasien_id', $pasien->id)
+            ->whereIn('status', ['menunggu', 'disetujui'])
+            ->first();
 
         if ($pending) {
-            return response()->json(['status' => 'error', 'message' => 'Anda masih memiliki permintaan refill yang belum diproses'], 422);
+            return response()->json(['status' => 'error', 'message' => 'Anda masih memiliki permintaan refill yang belum diproses atau sedang berjalan'], 422);
         }
 
         $lastSiklus = RefillObat::where('pasien_id', $pasien->id)->max('siklus_ke') ?? 0;
@@ -306,6 +320,31 @@ class PatientApiController extends Controller
         ]);
 
         return response()->json(['status' => 'success', 'message' => 'Permintaan refill obat berhasil diajukan', 'data' => $refill], 201);
+    }
+
+    public function uploadRefillPhoto(Request $request, $id)
+    {
+        $request->validate([
+            'foto_bukti' => 'required|image|max:5120' // Maksimal 5MB
+        ]);
+
+        $pasien = $this->getPasien();
+        if (!$pasien) return response()->json(['status' => 'error', 'message' => 'Data pasien tidak ditemukan'], 404);
+
+        $refill = RefillObat::where('id', $id)->where('pasien_id', $pasien->id)->first();
+        if (!$refill) return response()->json(['status' => 'error', 'message' => 'Pengajuan refill tidak ditemukan'], 404);
+
+        if ($refill->status !== 'disetujui') {
+            return response()->json(['status' => 'error', 'message' => 'Anda belum bisa mengunggah foto karena status pengajuan belum disetujui admin'], 422);
+        }
+
+        if ($request->hasFile('foto_bukti')) {
+            $path = $request->file('foto_bukti')->store('bukti', 'public');
+            $refill->foto_bukti = $path;
+            $refill->save();
+        }
+
+        return response()->json(['status' => 'success', 'message' => 'Bukti foto berhasil diunggah', 'data' => $refill]);
     }
 
 
@@ -394,6 +433,18 @@ class PatientApiController extends Controller
         return response()->json([
             'status' => 'success',
             'data'   => $notifikasi
+        ]);
+    }
+
+    public function markNotificationsAsRead(Request $request)
+    {
+        Notifikasi::where('user_id', $request->user()->id)
+            ->where('status', 'belum_dibaca')
+            ->update(['status' => 'dibaca']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Semua notifikasi telah ditandai dibaca'
         ]);
     }
 
