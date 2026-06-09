@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="" />
     <meta name="author" content="" />
-    <title>HI!Care</title>
+    <title>WEAR</title>
 
     {{-- SB Admin CSS --}}
     <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
@@ -22,8 +22,8 @@
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
         <!-- Navbar Brand-->
         <a class="navbar-brand ps-3 d-flex align-items-center" href="#">
-    <img src="{{ asset('template/assets/img/logo_hi1care.png') }}" alt="Logo" class="me-2" style="height: 45px !important; max-height: 45px !important; width: auto !important; object-fit: contain;">
-    <span class="fw-bold fs-4">HI!Care</span>
+    <img src="{{ asset('template/assets/img/logo_wear.jpeg') }}" alt="Logo" class="me-2" style="height: 45px !important; max-height: 45px !important; width: auto !important; object-fit: contain; border-radius: 50%;">
+    <span class="fw-bold fs-4">WEAR</span>
 </a>
 
         <!-- Sidebar Toggle -->
@@ -80,7 +80,7 @@
             <footer class="py-4 bg-light mt-auto">
                 <div class="container-fluid px-4">
                     <div class="d-flex align-items-center justify-content-between small">
-                        <div class="text-muted">© HI!Care {{ date('Y') }}</div>
+                        <div class="text-muted">© WEAR {{ date('Y') }}</div>
                         <div>
                             <a href="#">Privacy Policy</a>
                             &middot;

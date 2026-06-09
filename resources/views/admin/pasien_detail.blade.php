@@ -1,6 +1,6 @@
 @extends('layouts.v_template')
 
-@section('title', 'Detail Pasien - HI!-CARE')
+@section('title', 'Detail Pasien - WEAR')
 
 @section('content')
 @include('layouts.partials.admin-styles')
@@ -236,7 +236,7 @@
                 <div class="profile-card-header">
                     <div class="d-flex align-items-center gap-3">
                         @php
-                            $avatarColors = ['#0891b2','#0e7490','#059669','#2563eb','#7c3aed','#d97706'];
+                            $avatarColors = ['#012D1D','#0e7490','#059669','#012D1D','#7c3aed','#d97706'];
                             $patientName = $patient->master->nama ?? ($patient->user->nama ?? 'Pasien');
                             $pIni = strtoupper(substr($patientName, 0, 1));
                             $pCol = $avatarColors[ord($pIni) % count($avatarColors)];
@@ -342,7 +342,7 @@
                                     <div class="info-label">Jenis Kelamin</div>
                                     <div class="info-value">
                                         @if($patient->master->jenis_kelamin === 'L')
-                                            <i class="fas fa-mars me-1" style="color: #2563eb;"></i> Laki-laki
+                                            <i class="fas fa-mars me-1" style="color: #012D1D;"></i> Laki-laki
                                         @elseif($patient->master->jenis_kelamin === 'P')
                                             <i class="fas fa-venus me-1" style="color: #ec4899;"></i> Perempuan
                                         @else
@@ -354,7 +354,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="profile-info-item">
-                                <div class="info-icon" style="background: #dbeafe; color: #2563eb;">
+                                <div class="info-icon" style="background: #dbeafe; color: #012D1D;">
                                     <i class="fas fa-phone-alt"></i>
                                 </div>
                                 <div>

@@ -1,6 +1,6 @@
 @extends('layouts.v_template')
 
-@section('title', 'Monitoring Kepatuhan Pasien - HI!-CARE')
+@section('title', 'Monitoring Kepatuhan Pasien - WEAR')
 
 @section('content')
 @include('layouts.partials.admin-styles')
@@ -57,7 +57,7 @@
         <a href="{{ route('admin.laporan.export', request()->query()) }}" class="hi-btn hi-btn-sm" style="background: #059669; color: #fff; border: none;">
             <i class="fas fa-file-excel"></i> Ekspor Excel
         </a>
-        <a href="{{ route('admin.laporan.cetak', request()->query()) }}" class="hi-btn hi-btn-sm" style="background: #2563eb; color: #fff; border: none;">
+        <a href="{{ route('admin.laporan.cetak', request()->query()) }}" class="hi-btn hi-btn-sm" style="background: #012D1D; color: #fff; border: none;">
             <i class="fas fa-print"></i> Ekspor PDF
         </a>
         <a href="{{ route('admin.laporan.word', request()->query()) }}" class="hi-btn hi-btn-sm" style="background: #7c3aed; color: #fff; border: none;">
@@ -99,7 +99,7 @@
                         <td>
                             <div class="d-flex align-items-center gap-2">
                                 @php
-                                    $avatarColors = ['#0891b2','#0e7490','#059669','#2563eb','#7c3aed','#d97706'];
+                                    $avatarColors = ['#012D1D','#0e7490','#059669','#012D1D','#7c3aed','#d97706'];
                                     $pName = $patient->master->nama ?? ($patient->user->nama ?? 'P');
                                     $pIni = strtoupper(substr($pName, 0, 1));
                                     $pCol = $avatarColors[ord($pIni) % count($avatarColors)];
@@ -256,7 +256,7 @@
                     text: "Apakah Anda yakin ingin mengubah status akses pasien ini?",
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#0891b2',
+                    confirmButtonColor: '#012D1D',
                     cancelButtonColor: '#dc2626',
                     confirmButtonText: 'Ya, Ubah!',
                     cancelButtonText: 'Batal'

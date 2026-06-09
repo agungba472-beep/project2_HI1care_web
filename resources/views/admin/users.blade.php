@@ -1,6 +1,6 @@
 @extends('layouts.v_template')
 
-@section('title', 'Manajemen Pengguna - HI!-CARE')
+@section('title', 'Manajemen Pengguna - WEAR')
 
 @section('content')
 @include('layouts.partials.admin-styles')
@@ -98,7 +98,7 @@
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
                                         @php
-                                            $avatarColors = ['#0891b2','#0e7490','#059669','#2563eb','#7c3aed','#d97706'];
+                                            $avatarColors = ['#012D1D','#0e7490','#059669','#012D1D','#7c3aed','#d97706'];
                                             $uIni = strtoupper(substr($user->nama ?? 'U', 0, 1));
                                             $uCol = $avatarColors[ord($uIni) % count($avatarColors)];
                                         @endphp
@@ -243,7 +243,7 @@
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
                                         @php
-                                            $avatarColors = ['#0891b2','#0e7490','#059669','#2563eb','#7c3aed','#d97706'];
+                                            $avatarColors = ['#012D1D','#0e7490','#059669','#012D1D','#7c3aed','#d97706'];
                                             $nIni = strtoupper(substr($n->nama ?? 'N', 0, 1));
                                             $nCol = $avatarColors[ord($nIni) % count($avatarColors)];
                                         @endphp

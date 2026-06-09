@@ -1,6 +1,6 @@
 @extends('layouts.v_template')
 
-@section('title', 'Jadwal Praktik Nakes - HI!-CARE')
+@section('title', 'Jadwal Praktik Nakes - WEAR')
 
 @section('content')
 @include('layouts.partials.admin-styles')
@@ -57,7 +57,7 @@
                         <td>
                             <div class="d-flex align-items-center gap-2">
                                 @php
-                                    $avatarColors = ['#0891b2','#0e7490','#059669','#2563eb','#7c3aed','#d97706'];
+                                    $avatarColors = ['#012D1D','#0e7490','#059669','#012D1D','#7c3aed','#d97706'];
                                     $nNama = $jadwal->nakes->nama ?? 'N';
                                     $nIni = strtoupper(substr($nNama, 0, 1));
                                     $nCol = $avatarColors[ord($nIni) % count($avatarColors)];
@@ -72,11 +72,11 @@
                         <td>
                             @php
                                 $hariColor = match($jadwal->hari) {
-                                    'Senin' => '#2563eb',
+                                    'Senin' => '#012D1D',
                                     'Selasa' => '#7c3aed',
                                     'Rabu' => '#059669',
                                     'Kamis' => '#d97706',
-                                    'Jumat' => '#0891b2',
+                                    'Jumat' => '#012D1D',
                                     'Sabtu' => '#dc2626',
                                     'Minggu' => '#be185d',
                                     default => '#64748b',

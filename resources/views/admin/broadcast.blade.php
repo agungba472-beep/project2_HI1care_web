@@ -1,6 +1,6 @@
 @extends('layouts.v_template')
 
-@section('title', 'Broadcast Pesan - HI!-CARE')
+@section('title', 'Broadcast Pesan - WEAR')
 
 @section('content')
 @include('layouts.partials.admin-styles')
@@ -41,7 +41,7 @@
                             <div style="font-size: 0.78rem; color: #1e40af; font-weight: 600;">
                                 <i class="fas fa-info-circle me-1"></i> Informasi
                             </div>
-                            <div style="font-size: 0.72rem; color: #3b82f6; margin-top: 0.2rem;">
+                            <div style="font-size: 0.72rem; color: #00A86B; margin-top: 0.2rem;">
                                 Pesan ini akan dikirim sebagai notifikasi ke <strong>seluruh pasien</strong> yang berstatus akun aktif.
                             </div>
                         </div>
@@ -132,7 +132,7 @@
                                     @if($b->admin)
                                         <div class="d-flex align-items-center gap-2">
                                             @php
-                                                $avatarColors = ['#0891b2','#0e7490','#059669','#2563eb','#7c3aed','#d97706'];
+                                                $avatarColors = ['#012D1D','#0e7490','#059669','#012D1D','#7c3aed','#d97706'];
                                                 $aIni = strtoupper(substr($b->admin->nama ?? 'A', 0, 1));
                                                 $aCol = $avatarColors[ord($aIni) % count($avatarColors)];
                                             @endphp

@@ -1,6 +1,6 @@
 @extends('layouts.v_template')
 
-@section('title', 'Monitoring Refill ARV - HI!-CARE')
+@section('title', 'Monitoring Refill ARV - WEAR')
 
 @section('content')
 @include('layouts.partials.admin-styles')
@@ -109,7 +109,7 @@
                         <td>
                             <div class="d-flex align-items-center gap-2">
                                 @php
-                                    $avatarColors = ['#0891b2','#0e7490','#059669','#2563eb','#7c3aed','#d97706'];
+                                    $avatarColors = ['#012D1D','#0e7490','#059669','#012D1D','#7c3aed','#d97706'];
                                     $nama = $refill->pasien->master->nama ?? ($refill->pasien->user->nama ?? 'P');
                                     $rIni = strtoupper(substr($nama, 0, 1));
                                     $rCol = $avatarColors[ord($rIni) % count($avatarColors)];

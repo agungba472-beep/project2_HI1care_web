@@ -8,7 +8,7 @@
 
     :root {
         /* ===== Medical Color Palette ===== */
-        --primary:       #0891b2;  /* Teal */
+        --primary:       #012D1D;  /* Teal */
         --primary-dark:  #0e7490;
         --primary-light: #a5f3fc;
         --secondary:     #1e3a5f;  /* Navy */
@@ -19,7 +19,7 @@
         --warning-light: #fef3c7;
         --danger:        #dc2626;  /* Red */
         --danger-light:  #fee2e2;
-        --info:          #2563eb;  /* Blue */
+        --info:          #012D1D;  /* Blue */
         --info-light:    #dbeafe;
         --surface:       #f0fdfa;  /* Light teal tint */
         --text-primary:  #1e293b;
@@ -381,7 +381,7 @@
         <div class="d-flex justify-content-between align-items-start">
             <div>
                 <h2>Selamat Datang, {{ auth()->user()->nama ?? 'Admin' }}! 👋</h2>
-                <p>Dashboard monitoring kesehatan pasien HI!-CARE</p>
+                <p>Dashboard monitoring kesehatan pasien WEAR</p>
                 <div class="welcome-date">
                     <i class="fas fa-calendar-alt me-1"></i>
                     {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
@@ -573,7 +573,7 @@
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
                                         @php
-                                            $avatarColors = ['#0891b2','#0e7490','#059669','#2563eb','#7c3aed','#d97706'];
+                                            $avatarColors = ['#012D1D','#0e7490','#059669','#012D1D','#7c3aed','#d97706'];
                                             $initial = strtoupper(substr($pasien->user->nama ?? 'P', 0, 1));
                                             $color = $avatarColors[ord($initial) % count($avatarColors)];
                                         @endphp

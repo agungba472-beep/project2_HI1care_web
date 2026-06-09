@@ -23,14 +23,14 @@
         <style>
             body { font-family: 'Times New Roman', Times, serif; color: #333; margin: 20px; background: #fff; }
             .kop-surat { text-align: center; border-bottom: 4px double #000; padding-bottom: 10px; margin-bottom: 25px; }
-            .kop-surat h1 { margin: 0; font-size: 24px; color: #0891b2; text-transform: uppercase; }
+            .kop-surat h1 { margin: 0; font-size: 24px; color: #012D1D; text-transform: uppercase; }
             .kop-surat h3 { margin: 5px 0; font-size: 16px; color: #444; }
             .kop-surat p { margin: 2px 0; font-size: 12px; color: #666; }
             .judul-laporan { text-align: center; font-size: 16px; font-weight: bold; margin-bottom: 15px; text-decoration: underline; }
             .info-tanggal { text-align: right; font-size: 11px; margin-bottom: 10px; color: #555; }
             table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
             th, td { border: 1px solid #444; padding: 8px; text-align: left; }
-            th { background-color: #0891b2; color: white; text-align: center; text-transform: uppercase; }
+            th { background-color: #012D1D; color: white; text-align: center; text-transform: uppercase; }
             tr:nth-child(even) { background-color: #f9f9f9; }
             .text-center { text-align: center; }
             .badge-kepatuhan { font-weight: bold; }
@@ -46,7 +46,7 @@
 <body>
 
     <div class="kop-surat">
-        <h1>KLINIK VCT HI!-CARE</h1>
+        <h1>KLINIK VCT WEAR</h1>
         <h3>PELAYANAN & PENDAMPINGAN PASIEN ODHA</h3>
         <p>Jl. Kesehatan No. 123, Kota Subang, Jawa Barat, 41211</p>
         <p>Email: admin@hicare.com | Telp: (0260) 123456</p>
@@ -101,7 +101,7 @@
             <p>Subang, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
             <p>Penanggung Jawab Klinik,</p>
             @if(isset($isWord) && $isWord) <br><br><br> @else <div class="signature-space"></div> @endif
-            <p><strong><u>Dr. {{ auth()->user()->name ?? 'Nakes HI!-CARE' }}</u></strong><br>NIP. 19801010 200501 1 001</p>
+            <p><strong><u>Dr. {{ auth()->user()->name ?? 'Nakes WEAR' }}</u></strong><br>NIP. 19801010 200501 1 001</p>
         </div>
     </div>
 

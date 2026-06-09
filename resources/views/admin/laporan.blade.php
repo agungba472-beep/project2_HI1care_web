@@ -8,7 +8,7 @@
     <div class="page-header fade-up">
         <i class="fas fa-file-medical-alt header-icon"></i>
         <h1>Laporan & Rekapitulasi</h1>
-        <p>Ringkasan data pasien HI!-CARE</p>
+        <p>Ringkasan data pasien WEAR</p>
     </div>
 
     {{-- Stat Mini Cards --}}
@@ -68,7 +68,7 @@
                         <td>
                             <div class="d-flex align-items-center gap-2">
                                 @php
-                                    $avatarColors = ['#0891b2','#0e7490','#059669','#2563eb','#7c3aed','#d97706'];
+                                    $avatarColors = ['#012D1D','#0e7490','#059669','#012D1D','#7c3aed','#d97706'];
                                     $lIni = strtoupper(substr($laporan->user->nama ?? 'P', 0, 1));
                                     $lCol = $avatarColors[ord($lIni) % count($avatarColors)];
                                 @endphp

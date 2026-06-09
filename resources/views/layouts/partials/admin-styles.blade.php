@@ -3,7 +3,7 @@
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
     :root {
-        --primary:       #0891b2;
+        --primary:       #012D1D;
         --primary-dark:  #0e7490;
         --primary-light: #a5f3fc;
         --secondary:     #1e3a5f;
@@ -14,7 +14,7 @@
         --warning-light: #fef3c7;
         --danger:        #dc2626;
         --danger-light:  #fee2e2;
-        --info:          #2563eb;
+        --info:          #012D1D;
         --info-light:    #dbeafe;
         --surface:       #f0fdfa;
         --text-primary:  #1e293b;
@@ -179,7 +179,7 @@
     .hi-btn-warning:hover { background: #b45309; color: #fff; box-shadow: 0 4px 12px rgba(217,119,6,0.25); }
 
     .hi-btn-info      { background: var(--info); color: #fff; }
-    .hi-btn-info:hover { background: #1d4ed8; color: #fff; box-shadow: 0 4px 12px rgba(37,99,235,0.25); }
+    .hi-btn-info:hover { background: #012D1D; color: #fff; box-shadow: 0 4px 12px rgba(37,99,235,0.25); }
 
     .hi-btn-outline   { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); }
     .hi-btn-outline:hover { background: var(--primary); color: #fff; }
@@ -385,3 +385,10 @@
         color: var(--primary-dark);
     }
 </style>
+
+/* Deep Rebranding Overrides */
+.bg-primary { background-color: var(--primary) !important; }
+.text-primary { color: var(--primary) !important; }
+.btn-primary { background-color: var(--primary) !important; border-color: var(--primary) !important; }
+.btn-primary:hover { background-color: var(--primary-dark) !important; border-color: var(--primary-dark) !important; }
+

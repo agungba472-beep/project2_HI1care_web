@@ -4,9 +4,9 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="description" content="Login Admin HI!-CARE" />
+    <meta name="description" content="Login Admin WEAR" />
     <meta name="author" content="Team JAS" />
-    <title>Login Administrator - HI!-CARE</title>
+    <title>Login Administrator - WEAR</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,8 +15,8 @@
 
     <style>
         :root {
-            --primary: #0ea5e9; /* Light blue */
-            --primary-dark: #0284c7;
+            --primary: #012D1D; /* Light blue */
+            --primary-dark: #012D1D;
             --brand-bg: #0f172a; /* Sangat gelap, hampir hitam biru */
             --text-main: #334155;
             --text-light: #64748b;
@@ -334,8 +334,8 @@
         
         <div class="brand-section">
             <div class="brand-logo">
-                <i class="fa-solid fa-hand-holding-medical"></i>
-                HI!-CARE
+                <img src="{{ asset('template/assets/img/logo_wear.jpeg') }}" alt="Logo" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;">
+                WEAR
             </div>
 
             <div class="brand-content">
