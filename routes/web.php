@@ -50,6 +50,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     Route::get('/edukasi', [AdminEdukasiController::class, 'index'])->name('edukasi.index');
     Route::post('/edukasi', [AdminEdukasiController::class, 'store'])->name('edukasi.store');
+    Route::put('/edukasi/{id}', [AdminEdukasiController::class, 'update'])->name('edukasi.update');
     Route::delete('/edukasi/{id}', [AdminEdukasiController::class, 'destroy'])->name('edukasi.destroy');
 
     Route::get('/jadwal', [AdminJadwalController::class, 'index'])->name('jadwal.index');

@@ -384,11 +384,10 @@
         font-weight: 600;
         color: var(--primary-dark);
     }
+    /* Deep Rebranding Overrides */
+    .bg-primary { background-color: var(--primary) !important; }
+    .text-primary { color: var(--primary) !important; }
+    .btn-primary { background-color: var(--primary) !important; border-color: var(--primary) !important; }
+    .btn-primary:hover { background-color: var(--primary-dark) !important; border-color: var(--primary-dark) !important; }
 </style>
-
-/* Deep Rebranding Overrides */
-.bg-primary { background-color: var(--primary) !important; }
-.text-primary { color: var(--primary) !important; }
-.btn-primary { background-color: var(--primary) !important; border-color: var(--primary) !important; }
-.btn-primary:hover { background-color: var(--primary-dark) !important; border-color: var(--primary-dark) !important; }
 

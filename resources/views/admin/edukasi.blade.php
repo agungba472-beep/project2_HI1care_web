@@ -59,13 +59,18 @@
                             </span>
                         </td>
                         <td>
-                            <form action="{{ route('admin.edukasi.destroy', $modul->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus modul ini?');" style="display: inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="hi-btn hi-btn-danger hi-btn-sm">
-                                    <i class="fas fa-trash"></i> Hapus
+                            <div style="display: flex; gap: 0.35rem;">
+                                <button type="button" class="hi-btn hi-btn-warning hi-btn-sm" data-bs-toggle="modal" data-bs-target="#editEdukasiModal{{ $modul->id }}">
+                                    <i class="fas fa-edit"></i> Edit
                                 </button>
-                            </form>
+                                <form action="{{ route('admin.edukasi.destroy', $modul->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus modul ini?');" style="display: inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="hi-btn hi-btn-danger hi-btn-sm">
+                                        <i class="fas fa-trash"></i> Hapus
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     @empty
@@ -117,4 +122,47 @@
         </div>
     </div>
 </div>
+
+{{-- Modal: Edit Edukasi (Per Modul) --}}
+@foreach($moduls as $modul)
+<div class="modal fade hi-modal" id="editEdukasiModal{{ $modul->id }}" tabindex="-1" aria-labelledby="editEdukasiModalLabel{{ $modul->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editEdukasiModalLabel{{ $modul->id }}"><i class="fas fa-edit me-2"></i>Edit Modul Edukasi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('admin.edukasi.update', $modul->id) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit_judul_{{ $modul->id }}" class="form-label">Judul Artikel / Edukasi</label>
+                        <input type="text" class="form-control" id="edit_judul_{{ $modul->id }}" name="judul" required value="{{ $modul->judul }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_cover_{{ $modul->id }}" class="form-label">Cover / Gambar Edukasi (Opsional)</label>
+                        @if($modul->cover)
+                            <div style="margin-bottom: 0.5rem;">
+                                <img src="{{ asset('storage/' . $modul->cover) }}" alt="Cover saat ini" style="max-height: 120px; border-radius: 8px; border: 1px solid var(--border);">
+                                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">Cover saat ini. Upload baru untuk mengganti.</div>
+                            </div>
+                        @endif
+                        <input type="file" class="form-control" id="edit_cover_{{ $modul->id }}" name="cover" accept="image/*">
+                        <small class="text-muted">Format: JPG, PNG. Maksimal: 2MB. Kosongkan jika tidak ingin mengganti.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_konten_{{ $modul->id }}" class="form-label">Isi Konten</label>
+                        <textarea class="form-control" id="edit_konten_{{ $modul->id }}" name="konten" rows="8" required>{{ $modul->konten }}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="hi-btn hi-btn-outline" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="hi-btn hi-btn-primary"><i class="fas fa-save"></i> Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endforeach
 @endsection

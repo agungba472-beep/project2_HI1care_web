@@ -44,7 +44,7 @@
 
                 {{-- === Logout === --}}
                 <div class="sb-sidenav-menu-heading">Akun</div>
-                <a class="nav-link text-danger" href="#" onclick="event.preventDefault(); document.getElementById('sidebar-logout-form').submit();">
+                <a class="nav-link text-danger" href="#" onclick="event.preventDefault(); if(confirm('Apakah Anda yakin ingin logout?')) { document.getElementById('sidebar-logout-form').submit(); }">
                     <div class="sb-nav-link-icon"><i class="fas fa-sign-out-alt text-danger"></i></div>
                     Logout
                 </a>

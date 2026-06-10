@@ -48,6 +48,24 @@ class AuthController extends Controller
             ], 403);
         }
 
+        // CEK DOUBLE LOGIN (UAT Requirement: Tolak B jika A masih login)
+        $activeToken = $user->tokens()->latest('created_at')->first();
+        if ($activeToken) {
+            // Cek waktu aktivitas terakhir token
+            $lastActivity = $activeToken->last_used_at ?? $activeToken->created_at;
+            $idleMinutes = now()->diffInMinutes($lastActivity);
+
+            if ($idleMinutes < 15) {
+                // Token masih aktif (dipakai dalam 15 menit terakhir) → tolak login baru
+                return response()->json([
+                    'message' => 'Akun sedang digunakan di perangkat lain. Silakan coba beberapa saat lagi jika Anda lupa logout.'
+                ], 403);
+            }
+
+            // Token sudah idle lebih dari 15 menit → hapus dan izinkan login ulang
+            $user->tokens()->delete();
+        }
+
         // BUAT TOKEN
         $token = $user->createToken('auth_token')->plainTextToken;
 
