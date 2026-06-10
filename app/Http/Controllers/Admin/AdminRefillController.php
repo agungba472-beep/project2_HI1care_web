@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\RefillObat;
 use App\Models\Pasien;
 use App\Models\Notifikasi;
+use App\Services\FonnteService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -87,6 +88,11 @@ class AdminRefillController extends Controller
                 'pesan' => $messages[$newStatus],
                 'status' => 'belum_dibaca'
             ]);
+
+            try {
+                $waPesan = "*WEAR*\n\nStatus Refill ARV Anda: " . $messages[$newStatus];
+                FonnteService::sendMessage($refill->pasien->user_id, $waPesan);
+            } catch (\Exception $e) {}
         }
 
         $statusLabel = ['menunggu' => 'Menunggu', 'disetujui' => 'Disetujui', 'selesai' => 'Selesai'];

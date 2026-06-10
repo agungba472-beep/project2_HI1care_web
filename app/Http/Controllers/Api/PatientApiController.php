@@ -360,17 +360,38 @@ class PatientApiController extends Controller
 
     public function storeBooking(Request $request)
     {
-        $request->validate(['nakes_id' => 'required|exists:nakes,id', 'tanggal' => 'required|date|after_or_equal:today', 'waktu' => 'required']);
+        $request->validate([
+            'nakes_id' => 'required|exists:nakes,id', 
+            'tanggal' => 'required|date|after_or_equal:today', 
+            'waktu' => 'required',
+            'kategori' => 'nullable|in:booking,livechat'
+        ]);
         $pasien = $this->getPasien();
         if (!$pasien) return response()->json(['status' => 'error', 'message' => 'Data pasien tidak ditemukan'], 404);
 
         $existingBooking = Konsultasi::where('pasien_id', $pasien->id)->where('nakes_id', $request->nakes_id)->where('tanggal', $request->tanggal)->where('status', '!=', 'batal')->first();
 
         if ($existingBooking) {
+            if ($request->kategori === 'livechat') {
+                return response()->json([
+                    'status' => 'success', 
+                    'message' => 'Melanjutkan sesi chat yang sudah ada', 
+                    'data' => $existingBooking
+                ], 200);
+            }
             return response()->json(['status' => 'error', 'message' => 'Anda sudah memiliki booking dengan nakes ini pada tanggal tersebut'], 422);
         }
 
-        $booking = Konsultasi::create(['pasien_id' => $pasien->id, 'nakes_id' => $request->nakes_id, 'tanggal' => $request->tanggal, 'waktu' => $request->waktu, 'status' => 'pending']);
+        $kategori = $request->kategori ?? 'booking';
+
+        $booking = Konsultasi::create([
+            'pasien_id' => $pasien->id, 
+            'nakes_id' => $request->nakes_id, 
+            'tanggal' => $request->tanggal, 
+            'waktu' => $request->waktu, 
+            'status' => 'pending',
+            'kategori' => $kategori
+        ]);
         return response()->json(['status' => 'success', 'message' => 'Booking konsultasi berhasil dibuat', 'data' => $booking], 201);
     }
 
@@ -393,6 +414,7 @@ class PatientApiController extends Controller
                     'tanggal'       => $k->tanggal,
                     'waktu'         => $k->waktu,
                     'status'        => $k->status,
+                    'kategori'      => $k->kategori,
                     'chat_status'   => $k->chat_status,
                     'last_message'  => $k->latestChat?->pesan ?? 'Belum ada pesan',
                     'updated_at'    => $k->updated_at,

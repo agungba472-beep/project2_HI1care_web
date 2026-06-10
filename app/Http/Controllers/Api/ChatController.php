@@ -10,9 +10,10 @@ use App\Models\Notifikasi;
 use App\Models\Pasien;
 use Illuminate\Http\Request;
 use App\Events\MessageSent;
+use App\Services\FonnteService;
+
 class ChatController extends Controller
 {
-    // =========================================================================
     // CHATBOT RESPONSES (Rule-based — extensible untuk AI di masa depan)
     // =========================================================================
 
@@ -28,7 +29,7 @@ class ChatController extends Controller
         $rules = [
             // Salam
             ['keywords' => ['halo', 'hai', 'selamat pagi', 'selamat siang', 'selamat sore', 'selamat malam', 'hi', 'hello'],
-             'reply'    => 'Halo! 👋 Saya HI!-CARE Bot, asisten kesehatan digital Anda. Ada yang bisa saya bantu terkait pengobatan ARV atau kesehatan Anda hari ini?'],
+             'reply'    => 'Halo! 👋 Saya WEAR Bot, asisten kesehatan digital Anda. Ada yang bisa saya bantu terkait pengobatan ARV atau kesehatan Anda hari ini?'],
 
             // ARV umum
             ['keywords' => ['arv', 'antiretroviral', 'obat arv'],
@@ -40,11 +41,11 @@ class ChatController extends Controller
 
             // Jadwal minum obat
             ['keywords' => ['jadwal', 'waktu minum', 'kapan minum', 'jam minum', 'lupa minum'],
-             'reply'    => '⏰ Tips Jadwal Minum ARV:\n\n• Pilih waktu yang konsisten setiap hari (misal: jam 8 pagi)\n• Gunakan fitur Alarm di aplikasi HI!-CARE\n• Jika lupa, segera minum saat ingat (kecuali sudah mendekati dosis berikutnya)\n• JANGAN menggandakan dosis\n\nGunakan tab "Alarm" di aplikasi untuk mengatur pengingat otomatis! 🔔'],
+             'reply'    => '⏰ Tips Jadwal Minum ARV:\n\n• Pilih waktu yang konsisten setiap hari (misal: jam 8 pagi)\n• Gunakan fitur Alarm di aplikasi WEAR\n• Jika lupa, segera minum saat ingat (kecuali sudah mendekati dosis berikutnya)\n• JANGAN menggandakan dosis\n\nGunakan tab "Alarm" di aplikasi untuk mengatur pengingat otomatis! 🔔'],
 
             // Kepatuhan
             ['keywords' => ['kepatuhan', 'adherence', 'patuh', 'disiplin', 'rutin'],
-             'reply'    => '📊 Kepatuhan minum obat sangat penting! Target kepatuhan ARV adalah ≥95% agar virus tetap tertekan. Anda bisa memantau skor kepatuhan Anda di halaman Dashboard.\n\nTips meningkatkan kepatuhan:\n• Pasang alarm harian\n• Simpan obat di tempat yang mudah terlihat\n• Gunakan kotak obat mingguan\n• Catat di diary harian HI!-CARE'],
+             'reply'    => '📊 Kepatuhan minum obat sangat penting! Target kepatuhan ARV adalah ≥95% agar virus tetap tertekan. Anda bisa memantau skor kepatuhan Anda di halaman Dashboard.\n\nTips meningkatkan kepatuhan:\n• Pasang alarm harian\n• Simpan obat di tempat yang mudah terlihat\n• Gunakan kotak obat mingguan\n• Catat di diary harian WEAR'],
 
             // CD4 / viral load
             ['keywords' => ['cd4', 'viral load', 'vl', 'lab', 'pemeriksaan'],
@@ -72,7 +73,7 @@ class ChatController extends Controller
         }
 
         // Default response
-        return '🤖 Terima kasih atas pertanyaan Anda. Saat ini saya belum bisa menjawab pertanyaan tersebut secara spesifik.\n\nAnda bisa:\n• Bertanya tentang ARV, efek samping, jadwal minum obat, atau kepatuhan\n• Menggunakan fitur "Booking" untuk konsultasi langsung dengan tenaga kesehatan\n\nTenaga kesehatan akan segera mengambil alih percakapan ini jika diperlukan.';
+        return "🤖 Terima kasih atas pertanyaan Anda. Saat ini saya belum bisa menjawab pertanyaan tersebut secara spesifik.\n\nAnda bisa:\n• Bertanya tentang ARV, efek samping, jadwal minum obat, atau kepatuhan\n• Menggunakan fitur \"Booking\" untuk konsultasi langsung dengan tenaga kesehatan\n\nTenaga kesehatan akan segera mengambil alih percakapan ini jika diperlukan.";
     }
 
     // =========================================================================
@@ -119,6 +120,8 @@ class ChatController extends Controller
                     'id'         => $msg->id,
                     'sender'     => $msg->sender, // pasien, nakes, bot
                     'pesan'      => $msg->pesan,
+                    'file_url'   => $msg->file_url,
+                    'file_type'  => $msg->file_type,
                     'nakes_nama' => $msg->sender === 'nakes' ? ($msg->nakes?->user?->nama ?? $msg->nakes?->nama ?? 'Nakes') : null,
                     'waktu'      => $msg->created_at->format('H:i'),
                     'tanggal'    => $msg->created_at->format('Y-m-d'),
@@ -131,6 +134,7 @@ class ChatController extends Controller
             'data' => [
                 'konsultasi' => [
                     'id'          => $konsultasi->id,
+                    'kategori'    => $konsultasi->kategori,
                     'chat_status' => $konsultasi->chat_status,
                     'status'      => $konsultasi->status,
                     'nakes_nama'  => $konsultasi->nakes?->user?->nama ?? $konsultasi->nakes?->nama ?? 'Nakes',
@@ -157,7 +161,8 @@ class ChatController extends Controller
     {
         $request->validate([
             'konsultasi_id' => 'required|exists:konsultasi,id',
-            'pesan'         => 'required|string|max:2000',
+            'pesan'         => 'required_without:file_lampiran|nullable|string|max:2000',
+            'file_lampiran' => 'nullable|file|mimes:jpg,jpeg,png,mp4,m4a,mp3,wav,webm,ogg,aac|max:20480',
         ]);
 
         $user = auth()->user();
@@ -178,13 +183,42 @@ class ChatController extends Controller
             ], 403);
         }
 
+        // Handle file upload
+        $fileUrl = null;
+        $fileType = null;
+
+        if ($request->hasFile('file_lampiran')) {
+            $file = $request->file('file_lampiran');
+            $path = $file->store('chat_files', 'public');
+            $fileUrl = $path;
+
+            $ext = strtolower($file->getClientOriginalExtension());
+            if (in_array($ext, ['m4a', 'mp3', 'wav', 'webm', 'ogg', 'aac'])) {
+                $fileType = 'audio';
+            } else {
+                $mime = $file->getMimeType();
+                if (str_starts_with($mime, 'image/')) {
+                    $fileType = 'image';
+                } elseif (str_starts_with($mime, 'video/')) {
+                    $fileType = 'video';
+                } elseif (str_starts_with($mime, 'audio/')) {
+                    $fileType = 'audio';
+                } else {
+                    if (in_array($ext, ['jpg', 'jpeg', 'png'])) $fileType = 'image';
+                    elseif ($ext === 'mp4') $fileType = 'video';
+                }
+            }
+        }
+
         // Simpan pesan pengirim
         $chat = Chat::create([
             'pasien_id'      => $konsultasi->pasien_id,
             'nakes_id'       => $konsultasi->nakes_id,
             'konsultasi_id'  => $konsultasi->id,
             'sender'         => $senderType,
-            'pesan'          => $request->pesan,
+            'pesan'          => $request->pesan ?? '',
+            'file_url'       => $fileUrl,
+            'file_type'      => $fileType,
         ]);
         broadcast(new MessageSent($chat))->toOthers();
         $botReply = null;
@@ -228,14 +262,24 @@ class ChatController extends Controller
 
         // Tembakkan ke tabel notifikasi jika target ditemukan
         if ($targetUserId) {
+            $kategoriStr = $konsultasi->kategori === 'livechat' ? 'Live Chat' : 'Konsultasi Booking';
+            
             \App\Models\Notifikasi::create([
                 'user_id' => $targetUserId,
-                'judul'   => $senderType === 'pasien' ? 'Pesan Pasien Baru' : 'Balasan Chat Nakes',
+                'judul'   => $senderType === 'pasien' ? "Pesan Pasien ($kategoriStr)" : "Balasan Nakes ($kategoriStr)",
                 'pesan'   => $senderType === 'pasien' 
-                    ? 'Ada pesan baru masuk dari pasien di ruang konsultasi.' 
-                    : 'Nakes telah membalas chat Anda. Silakan periksa ruang konsultasi.',
+                    ? "Ada pesan baru masuk dari pasien di sesi $kategoriStr." 
+                    : "Nakes telah membalas chat Anda di sesi $kategoriStr. Silakan periksa.",
                 'status'  => 'belum_dibaca' // Menyalakan titik merah lonceng
             ]);
+
+            // Kirim WhatsApp Notifikasi
+            try {
+                $waPesan = $senderType === 'pasien'
+                    ? "*WEAR*\n\nAda pesan baru masuk dari pasien di sesi *$kategoriStr*. Silakan buka aplikasi untuk membalas."
+                    : "*WEAR*\n\nTenaga Kesehatan telah membalas chat Anda di sesi *$kategoriStr*. Silakan buka aplikasi untuk mengecek.";
+                FonnteService::sendMessage($targetUserId, $waPesan);
+            } catch (\Exception $e) {}
         }
 
         return response()->json([
@@ -310,6 +354,12 @@ class ChatController extends Controller
                 'pesan'   => 'Tenaga kesehatan telah mengambil alih percakapan Anda. Chatbot dinonaktifkan.',
                 'tipe'    => 'chat',
             ]);
+
+            // Kirim WhatsApp Notifikasi
+            try {
+                $waPesan = "*WEAR*\n\nTenaga kesehatan telah mengambil alih percakapan Anda. Chatbot dinonaktifkan.";
+                FonnteService::sendMessage($targetUserId, $waPesan);
+            } catch (\Exception $e) {}
         }
 
         return response()->json([
@@ -355,6 +405,7 @@ class ChatController extends Controller
                     'pasien_nama'     => $k->pasien?->user?->nama ?? $k->pasien?->master?->nama ?? 'Pasien',
                     'pasien_id'       => $k->pasien_id,
                     'status'          => $k->status,
+                    'kategori'        => $k->kategori,
                     'chat_status'     => $k->chat_status,
                     'tanggal'         => $k->tanggal,
                     'waktu'           => $k->waktu,
@@ -364,7 +415,10 @@ class ChatController extends Controller
                     'last_message_at' => $k->latestChat?->created_at?->format('H:i') ?? '',
                     'updated_at'      => $k->updated_at,
                 ];
-            });
+            })
+            // Satukan per pasien: ambil sesi terbaru saja per pasien_id
+            ->unique('pasien_id')
+            ->values();
 
         return response()->json([
             'status' => 'success',

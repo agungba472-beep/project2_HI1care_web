@@ -8,7 +8,7 @@ class Konsultasi extends Model
 {
     protected $table = 'konsultasi';
 
-    protected $fillable = ['pasien_id', 'nakes_id', 'tanggal', 'waktu', 'status', 'chat_status'];
+    protected $fillable = ['pasien_id', 'nakes_id', 'tanggal', 'waktu', 'status', 'chat_status', 'kategori'];
 
     public function pasien()
     {

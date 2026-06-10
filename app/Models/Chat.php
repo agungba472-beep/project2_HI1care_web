@@ -8,7 +8,7 @@ class Chat extends Model
 {
     protected $table = 'chat';
 
-    protected $fillable = ['pasien_id', 'nakes_id', 'konsultasi_id', 'sender', 'pesan'];
+    protected $fillable = ['pasien_id', 'nakes_id', 'konsultasi_id', 'sender', 'pesan', 'file_url', 'file_type'];
 
     public function pasien()
     {

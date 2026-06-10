@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Notifikasi;
 use App\Models\User;
+use App\Services\FonnteService;
 
 class AdminController extends Controller
 {
@@ -34,6 +35,11 @@ class AdminController extends Controller
         'judul' => 'Akun Disetujui',
         'pesan' => 'Akun anda sudah aktif, silakan login'
     ]);
+
+        try {
+            $waPesan = "*WEAR*\n\nAkun Anda telah disetujui oleh Admin. Silakan login ke aplikasi.";
+            FonnteService::sendMessage($user->id, $waPesan);
+        } catch (\Exception $e) {}
 
         return response()->json([
             'message' => 'User berhasil di-approve'
