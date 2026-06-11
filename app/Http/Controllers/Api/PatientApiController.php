@@ -156,8 +156,7 @@ class PatientApiController extends Controller
         AlarmArv::where('pasien_id', $pasien->id)
             ->where('status', 'belum')
             ->where('tanggal', '>=', now()->toDateString())
-            // ->delete()
-            ;
+            ->delete();
 
         $isEveryday = filter_var($request->is_everyday, FILTER_VALIDATE_BOOLEAN);
         $startDate = \Carbon\Carbon::parse($request->tanggal);
@@ -369,20 +368,20 @@ class PatientApiController extends Controller
         $pasien = $this->getPasien();
         if (!$pasien) return response()->json(['status' => 'error', 'message' => 'Data pasien tidak ditemukan'], 404);
 
-        $existingBooking = Konsultasi::where('pasien_id', $pasien->id)->where('nakes_id', $request->nakes_id)->where('tanggal', $request->tanggal)->where('status', '!=', 'batal')->first();
+        $kategori = $request->kategori ?? 'booking';
+
+        $existingBooking = Konsultasi::where('pasien_id', $pasien->id)
+            ->where('nakes_id', $request->nakes_id)
+            ->whereIn('status', ['pending', 'diterima', 'dijadwalkan'])
+            ->first();
 
         if ($existingBooking) {
-            if ($request->kategori === 'livechat') {
-                return response()->json([
-                    'status' => 'success', 
-                    'message' => 'Melanjutkan sesi chat yang sudah ada', 
-                    'data' => $existingBooking
-                ], 200);
-            }
-            return response()->json(['status' => 'error', 'message' => 'Anda sudah memiliki booking dengan nakes ini pada tanggal tersebut'], 422);
+            return response()->json([
+                'status' => 'success', 
+                'message' => 'Melanjutkan sesi chat yang sudah ada', 
+                'data' => $existingBooking
+            ], 200);
         }
-
-        $kategori = $request->kategori ?? 'booking';
 
         $booking = Konsultasi::create([
             'pasien_id' => $pasien->id, 
@@ -392,6 +391,18 @@ class PatientApiController extends Controller
             'status' => 'pending',
             'kategori' => $kategori
         ]);
+
+        if ($kategori === 'booking') {
+            $jadwal = JadwalNakes::where('nakes_id', $request->nakes_id)
+                ->where('hari', \Carbon\Carbon::parse($request->tanggal)->translatedFormat('l'))
+                ->where('jam_mulai', '<=', $request->waktu)
+                ->first();
+                
+            if ($jadwal && $jadwal->kuota > 0) {
+                $jadwal->decrement('kuota');
+            }
+        }
+
         return response()->json(['status' => 'success', 'message' => 'Booking konsultasi berhasil dibuat', 'data' => $booking], 201);
     }
 

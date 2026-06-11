@@ -416,8 +416,6 @@ class ChatController extends Controller
                     'updated_at'      => $k->updated_at,
                 ];
             })
-            // Satukan per pasien: ambil sesi terbaru saja per pasien_id
-            ->unique('pasien_id')
             ->values();
 
         return response()->json([
