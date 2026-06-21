@@ -21,7 +21,7 @@ Broadcast::channel('konsultasi.{konsultasiId}', function ($user, $konsultasiId) 
 
 // Membuat Presence Channel untuk mendeteksi siapa saja yang sedang online
 Broadcast::channel('presence-klinik', function ($user) {
-    if (auth()->check()) {
+    if ($user) {
         return [
             'id' => $user->id,
             'nama' => $user->nama,

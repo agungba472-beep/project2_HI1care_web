@@ -276,8 +276,8 @@ class ChatController extends Controller
             // Kirim WhatsApp Notifikasi
             try {
                 $waPesan = $senderType === 'pasien'
-                    ? "*WEAR*\n\nAda pesan baru masuk dari pasien di sesi *$kategoriStr*. Silakan buka aplikasi untuk membalas."
-                    : "*WEAR*\n\nTenaga Kesehatan telah membalas chat Anda di sesi *$kategoriStr*. Silakan buka aplikasi untuk mengecek.";
+                    ? "Halo, ada pesan baru masuk dari pasien di sesi *$kategoriStr*.\n\nSilakan klik tautan di bawah ini untuk membuka aplikasi dan membalas:\nhttps://hi1care.test (atau buka aplikasi di HP Anda)\n\n_Pesan otomatis dikirim oleh Aplikasi WEAR_"
+                    : "Halo, Tenaga Kesehatan telah membalas chat Anda di sesi *$kategoriStr*.\n\nSilakan klik tautan di bawah ini untuk membuka aplikasi dan mengecek:\nhttps://hi1care.test (atau buka aplikasi di HP Anda)\n\n_Pesan otomatis dikirim oleh Aplikasi WEAR_";
                 FonnteService::sendMessage($targetUserId, $waPesan);
             } catch (\Exception $e) {}
         }
@@ -357,7 +357,7 @@ class ChatController extends Controller
 
             // Kirim WhatsApp Notifikasi
             try {
-                $waPesan = "*WEAR*\n\nTenaga kesehatan telah mengambil alih percakapan Anda. Chatbot dinonaktifkan.";
+                $waPesan = "Halo, Tenaga kesehatan telah mengambil alih percakapan Anda di Chat. Chatbot kini dinonaktifkan.\n\nSilakan buka aplikasi untuk melanjutkan percakapan dengan Nakes.\n\n_Pesan otomatis dikirim oleh Aplikasi WEAR_";
                 FonnteService::sendMessage($targetUserId, $waPesan);
             } catch (\Exception $e) {}
         }

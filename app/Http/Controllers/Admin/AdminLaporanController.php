@@ -88,4 +88,39 @@ class AdminLaporanController extends Controller
         $isWord = true; // Penanda bahwa ini diunduh sebagai Word
         return view('admin.laporan_cetak', compact('dataLaporan', 'isWord'));
     }
+
+    // 4. FITUR CETAK REKAM MEDIS (PDF PER PASIEN)
+    public function cetakDetailPasien($id)
+    {
+        $patient = Pasien::with(['user', 'master', 'kepatuhan', 'diaryHarian', 'refillObat'])->findOrFail($id);
+        
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+        $daysInMonth = now()->daysInMonth;
+
+        $diminumCount = $patient->kepatuhan()
+            ->whereIn('status', ['diminum', 'tepat waktu', 'hijau'])
+            ->whereMonth('last_update', $currentMonth)
+            ->whereYear('last_update', $currentYear)
+            ->count();
+        
+        $adherenceRate = round(($diminumCount / $daysInMonth) * 100);
+
+        $terlewatCount = $patient->kepatuhan()
+            ->whereIn('status', ['terlewat', 'tunda'])
+            ->whereMonth('last_update', $currentMonth)
+            ->whereYear('last_update', $currentYear)
+            ->count();
+
+        $statusWarna = 'merah';
+        if ($terlewatCount == 0) {
+            $statusWarna = 'hijau';
+        } elseif ($terlewatCount <= 2) {
+            $statusWarna = 'kuning';
+        }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.laporan_cetak_detail', compact('patient', 'adherenceRate', 'diminumCount', 'statusWarna'));
+        
+        return $pdf->stream('Rekam_Medis_' . ($patient->master->nama ?? 'Pasien') . '.pdf');
+    }
 }

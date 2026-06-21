@@ -15,6 +15,42 @@ class AdminDashboardController extends Controller
 {
     public function index(Request $request)
     {
+        // Sinkronisasi status kepatuhan semua pasien berdasarkan bulan berjalan
+        $patients = Pasien::all();
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+        $daysInMonth = now()->daysInMonth;
+
+        foreach ($patients as $patient) {
+            $diminumCount = $patient->kepatuhan()
+                ->whereIn('status', ['diminum', 'tepat waktu', 'hijau'])
+                ->whereMonth('last_update', $currentMonth)
+                ->whereYear('last_update', $currentYear)
+                ->count();
+            
+            $adherenceRate = round(($diminumCount / $daysInMonth) * 100);
+            
+            $terlewatCount = $patient->kepatuhan()
+                ->whereIn('status', ['terlewat', 'tunda'])
+                ->whereMonth('last_update', $currentMonth)
+                ->whereYear('last_update', $currentYear)
+                ->count();
+
+            $newStatus = 'merah';
+            if ($terlewatCount == 0) {
+                $newStatus = 'hijau';
+            } elseif ($terlewatCount <= 2) {
+                $newStatus = 'kuning';
+            } else {
+                $newStatus = 'merah';
+            }
+
+            if ($patient->status_kepatuhan !== $newStatus) {
+                $patient->status_kepatuhan = $newStatus;
+                $patient->save();
+            }
+        }
+
         // Statistik Ringkasan
         $stats = [
             'total_pasien' => Pasien::count(),

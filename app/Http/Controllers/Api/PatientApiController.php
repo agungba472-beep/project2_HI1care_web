@@ -61,6 +61,18 @@ class PatientApiController extends Controller
             ->where('status', 'belum_dibaca')
             ->count();
 
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+        $daysInMonth = now()->daysInMonth;
+
+        $diminumCount = Kepatuhan::where('pasien_id', $user->pasien->id)
+            ->whereIn('status', ['diminum', 'tepat waktu', 'hijau'])
+            ->whereMonth('last_update', $currentMonth)
+            ->whereYear('last_update', $currentYear)
+            ->count();
+
+        $persentase = round(($diminumCount / $daysInMonth) * 100);
+
         return response()->json([
             'status' => 'success',
             'data' => [
@@ -70,6 +82,8 @@ class PatientApiController extends Controller
                 'jadwal_hari_ini' => $jadwalHariIni,
                 'kepatuhan_terbaru' => $pasien->kepatuhan->first(),
                 'status_kepatuhan' => $pasien->status_kepatuhan ?? 'hijau',
+                'kepatuhan_percentage' => $persentase,
+                'kepatuhan_diminum_count' => $diminumCount,
                 'unread_notif_count' => $unreadNotifCount
             ]
         ]);
@@ -97,7 +111,8 @@ class PatientApiController extends Controller
     public function markAlarmAsTaken(Request $request, $id)
     {
         $request->validate([
-            'foto_bukti' => 'nullable|image|max:5120' // Maksimal 5MB
+            'foto_bukti' => 'nullable|image|max:5120', // Maksimal 5MB
+            'status' => 'nullable|in:diminum,terlewat'
         ]);
 
         $pasien = $this->getPasien();
@@ -121,9 +136,11 @@ class PatientApiController extends Controller
             $fotoPath = $path;
         }
 
+        $kepatuhanStatus = $request->input('status', 'diminum');
+
         Kepatuhan::create([
             'pasien_id'   => $pasien->id,
-            'status'      => 'diminum',
+            'status'      => $kepatuhanStatus,
             'last_update' => now(),
             'foto_bukti'  => $fotoPath,
         ]);
@@ -223,16 +240,18 @@ class PatientApiController extends Controller
 
     private function updateStatusKepatuhan(Pasien $pasien)
     {
-        $recentLogs = Kepatuhan::where('pasien_id', $pasien->id)->latest('last_update')->take(30)->get();
-        if ($recentLogs->isEmpty()) return;
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
 
-        $total = $recentLogs->count();
-        $diminum = $recentLogs->whereIn('status', ['diminum', 'tepat waktu'])->count();
-        $persentase = ($diminum / $total) * 100;
+        $terlewatCount = Kepatuhan::where('pasien_id', $pasien->id)
+            ->whereIn('status', ['terlewat', 'tunda'])
+            ->whereMonth('last_update', $currentMonth)
+            ->whereYear('last_update', $currentYear)
+            ->count();
 
-        if ($persentase >= 80) $status = 'hijau';
-        elseif ($persentase >= 50) $status = 'kuning';
-        else $status = 'merah';
+        $status = 'merah';
+        if ($terlewatCount == 0) $status = 'hijau';
+        elseif ($terlewatCount <= 2) $status = 'kuning';
 
         $pasien->update(['status_kepatuhan' => $status]);
     }
@@ -372,6 +391,7 @@ class PatientApiController extends Controller
 
         $existingBooking = Konsultasi::where('pasien_id', $pasien->id)
             ->where('nakes_id', $request->nakes_id)
+            ->where('kategori', $kategori)
             ->whereIn('status', ['pending', 'diterima', 'dijadwalkan'])
             ->first();
 
@@ -383,6 +403,20 @@ class PatientApiController extends Controller
             ], 200);
         }
 
+        if ($kategori === 'booking') {
+            $jadwal = JadwalNakes::where('nakes_id', $request->nakes_id)
+                ->where('hari', \Carbon\Carbon::parse($request->tanggal)->translatedFormat('l'))
+                ->where('jam_mulai', '<=', $request->waktu)
+                ->first();
+
+            if ($jadwal && $jadwal->kuota <= 0) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Maaf, kuota konsultasi untuk jadwal ini sudah penuh pada hari ini.'
+                ], 422);
+            }
+        }
+
         $booking = Konsultasi::create([
             'pasien_id' => $pasien->id, 
             'nakes_id' => $request->nakes_id, 
@@ -392,15 +426,8 @@ class PatientApiController extends Controller
             'kategori' => $kategori
         ]);
 
-        if ($kategori === 'booking') {
-            $jadwal = JadwalNakes::where('nakes_id', $request->nakes_id)
-                ->where('hari', \Carbon\Carbon::parse($request->tanggal)->translatedFormat('l'))
-                ->where('jam_mulai', '<=', $request->waktu)
-                ->first();
-                
-            if ($jadwal && $jadwal->kuota > 0) {
-                $jadwal->decrement('kuota');
-            }
+        if ($kategori === 'booking' && isset($jadwal) && $jadwal->kuota > 0) {
+            $jadwal->decrement('kuota');
         }
 
         return response()->json(['status' => 'success', 'message' => 'Booking konsultasi berhasil dibuat', 'data' => $booking], 201);

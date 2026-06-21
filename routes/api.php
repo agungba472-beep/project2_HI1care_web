@@ -83,6 +83,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Manajemen Konsultasi
         Route::get('/consultations/pending', [NakesApiController::class, 'getPendingConsultations']);
         Route::post('/consultations/{id}/respond', [NakesApiController::class, 'respondConsultation']);
+        Route::post('/consultations/{id}/finish', [NakesApiController::class, 'finishConsultation']);
         
         // Live Chat
         Route::get('/active-chats', [ChatController::class, 'getActiveChats']);

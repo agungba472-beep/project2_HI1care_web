@@ -106,7 +106,7 @@ class NakesApiController extends Controller
         if (!$nakes) return response()->json(['status' => 'error', 'message' => 'Akses ditolak'], 403);
         
         $chats = Konsultasi::where('nakes_id', $nakes->id)
-            ->whereIn('status', ['diterima', 'dijadwalkan'])
+            ->whereIn('status', ['diterima', 'dijadwalkan', 'selesai'])
             ->with(['pasien.user', 'pasien.master', 'latestChat'])
             ->orderByDesc('updated_at')
             ->get();
@@ -160,6 +160,30 @@ class NakesApiController extends Controller
 
         if (!$pasien) return response()->json(['status' => 'error', 'message' => 'Data pasien tidak ditemukan'], 404);
 
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+        $daysInMonth = now()->daysInMonth;
+
+        $diminumCount = $pasien->kepatuhan()
+            ->whereIn('status', ['diminum', 'tepat waktu', 'hijau'])
+            ->whereMonth('last_update', $currentMonth)
+            ->whereYear('last_update', $currentYear)
+            ->count();
+
+        $persentase = round(($diminumCount / $daysInMonth) * 100);
+        
+        $pasien->kepatuhan_percentage = $persentase;
+        $pasien->kepatuhan_diminum_count = $diminumCount;
+
         return response()->json(['status' => 'success', 'data' => $pasien]);
+    }
+
+    public function finishConsultation($id)
+    {
+        $konsultasi = Konsultasi::find($id);
+        if (!$konsultasi) return response()->json(['status' => 'error', 'message' => 'Sesi tidak ditemukan'], 404);
+        
+        $konsultasi->update(['status' => 'selesai']);
+        return response()->json(['status' => 'success', 'message' => 'Sesi konsultasi telah berhasil diselesaikan.']);
     }
 }

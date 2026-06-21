@@ -200,6 +200,159 @@
     @keyframes pulse-ring {
         0%, 100% { opacity: 1; }
         50% { opacity: 0.7; }
+    /* ===== Fix for DataTables Empty State & Numbering ===== */
+    .hi-table tbody {
+        counter-reset: rowNumber;
+    }
+    .hi-table tbody tr:not(.datatable-empty) {
+        counter-increment: rowNumber;
+    }
+    .row-number::before {
+        content: counter(rowNumber);
+    }
+    
+    /* ===== Fix for Simple-DataTables Pagination UI ===== */
+    .dataTable-pagination {
+        margin-top: 15px;
+    }
+    .dataTable-pagination ul {
+        display: flex;
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+    .dataTable-pagination li {
+        margin: 0 2px;
+    }
+    .dataTable-pagination a {
+        padding: 6px 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--primary);
+        background-color: #fff;
+        font-weight: 500;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
+    }
+    .dataTable-pagination a:hover {
+        background-color: #f1f5f9;
+        color: var(--primary-dark);
+    }
+    .dataTable-pagination .active a {
+        background-color: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+        box-shadow: 0 2px 4px rgba(14, 116, 144, 0.2);
+    }
+    .dataTable-pagination .disabled a {
+        color: #94a3b8;
+        background-color: #f8fafc;
+        cursor: not-allowed;
+    }
+
+    /* ===== DataTables Overrides & Table Premium Aesthetics ===== */
+    .dataTable-wrapper .dataTable-top {
+        padding: 1.5rem;
+        background: #ffffff;
+        border-bottom: 1px solid #f1f5f9;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .dataTable-wrapper .dataTable-bottom {
+        padding: 1.5rem;
+        background: #ffffff;
+        border-top: 1px solid #f1f5f9;
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+    .dataTable-wrapper .dataTable-input {
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 0.5rem 1.25rem;
+        font-size: 0.85rem;
+        background: #f8fafc;
+        transition: all 0.3s ease;
+        width: 250px;
+    }
+    .dataTable-wrapper .dataTable-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: #ffffff;
+        box-shadow: 0 0 0 4px rgba(14, 116, 144, 0.1);
+        width: 300px;
+    }
+    .dataTable-wrapper .dataTable-selector {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.4rem 0.75rem;
+        font-size: 0.85rem;
+        background: #ffffff;
+        color: var(--text-primary);
+        font-weight: 500;
+        cursor: pointer;
+    }
+    .dataTable-info {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+    .dataTable-pagination a {
+        border-radius: 8px !important;
+        margin: 0 3px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: 0.5rem 0.85rem !important;
+        color: var(--text-secondary) !important;
+        transition: all 0.2s ease;
+    }
+    .dataTable-pagination a:hover {
+        background: #f1f5f9 !important;
+        color: var(--primary) !important;
+    }
+    .dataTable-pagination .active a {
+        background-color: var(--primary) !important;
+        border-color: var(--primary) !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 10px rgba(14, 116, 144, 0.2) !important;
+    }
+    
+    /* Premium Table Styles */
+    .hi-table, .dataTable-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: #ffffff;
+    }
+    .hi-table th, .dataTable-table th {
+        background: #f8fafc;
+        color: #64748b;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 2px solid #e2e8f0;
+        white-space: nowrap;
+    }
+    .hi-table td, .dataTable-table td {
+        padding: 1.25rem 1.5rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.85rem;
+        color: var(--text-primary);
+        transition: background-color 0.2s ease;
+    }
+    .hi-table tbody tr:hover td, .dataTable-table tbody tr:hover td {
+        background-color: #f8fafc;
+    }
+    .hi-table tbody tr:last-child td, .dataTable-table tbody tr:last-child td {
+        border-bottom: none;
     }
 
     /* ===== Responsive ===== */
@@ -222,9 +375,14 @@
                 <h1>Detail Pasien</h1>
                 <p>Informasi lengkap, riwayat kepatuhan, diary kesehatan, dan refill ARV</p>
             </div>
-            <a href="{{ route('admin.pasien.index') }}" class="hi-btn" style="background: rgba(255,255,255,0.15); color: #fff; border: 1.5px solid rgba(255,255,255,0.3); backdrop-filter: blur(4px);">
-                <i class="fas fa-arrow-left"></i> Kembali ke Monitoring
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('admin.laporan.cetakDetail', $patient->id) }}" target="_blank" class="hi-btn" style="background: var(--primary); color: #fff; border: 1.5px solid rgba(255,255,255,0.3); backdrop-filter: blur(4px);">
+                    <i class="fas fa-print"></i> Cetak Rekam Medis (PDF)
+                </a>
+                <a href="{{ route('admin.pasien.index') }}" class="hi-btn" style="background: rgba(255,255,255,0.15); color: #fff; border: 1.5px solid rgba(255,255,255,0.3); backdrop-filter: blur(4px);">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </a>
+            </div>
         </div>
     </div>
 
@@ -418,9 +576,9 @@
                 </div>
 
                 @php
-                    $ringColor = $adherenceRate >= 80 ? '#059669' : ($adherenceRate >= 50 ? '#d97706' : '#dc2626');
-                    $ringBg = $adherenceRate >= 80 ? '#d1fae5' : ($adherenceRate >= 50 ? '#fef3c7' : '#fee2e2');
-                    $ringText = $adherenceRate >= 80 ? 'Baik' : ($adherenceRate >= 50 ? 'Waspada' : 'Kritis');
+                    $ringColor = $statusWarna == 'hijau' ? '#059669' : ($statusWarna == 'kuning' ? '#d97706' : '#dc2626');
+                    $ringBg = $statusWarna == 'hijau' ? '#d1fae5' : ($statusWarna == 'kuning' ? '#fef3c7' : '#fee2e2');
+                    $ringText = $statusWarna == 'hijau' ? 'Patuh (Disiplin)' : ($statusWarna == 'kuning' ? 'Waspada' : 'Tidak Patuh');
                     $circumference = 2 * 3.14159 * 54;
                     $offset = $circumference - ($adherenceRate / 100) * $circumference;
                 @endphp
@@ -444,14 +602,14 @@
                 </div>
 
                 <div class="adherence-status" style="background: {{ $ringBg }}; color: {{ $ringColor }};">
-                    <i class="fas fa-{{ $adherenceRate >= 80 ? 'check-circle' : ($adherenceRate >= 50 ? 'exclamation-triangle' : 'times-circle') }} me-1"></i>
+                    <i class="fas fa-{{ $statusWarna == 'hijau' ? 'check-circle' : ($statusWarna == 'kuning' ? 'exclamation-triangle' : 'times-circle') }} me-1"></i>
                     {{ $ringText }}
                 </div>
 
                 <div class="mt-3" style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.5;">
-                    Dihitung dari <strong>{{ $patient->kepatuhan->count() }}</strong> total catatan kepatuhan.
+                    Dihitung dari <strong>{{ \Carbon\Carbon::now()->daysInMonth }}</strong> hari di bulan {{ \Carbon\Carbon::now()->translatedFormat('F') }}.
                     <br>
-                    <strong>{{ $patient->kepatuhan->where('status', 'hijau')->count() }}</strong> kali patuh minum obat.
+                    <strong>{{ $diminumCount ?? 0 }}</strong> kali patuh minum obat bulan ini.
                 </div>
             </div>
 
@@ -469,6 +627,49 @@
                     <div class="stat-num" style="color: var(--success);">{{ $patient->refillObat->count() }}</div>
                     <div class="stat-lbl">Refill</div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ===== Filter Bulan & Tahun ===== --}}
+    <div class="row fade-up mb-4" style="animation-delay: 0.22s;">
+        <div class="col-12">
+            <div class="bg-white p-3 rounded-4" style="border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                <form method="GET" action="{{ route('admin.pasien.show', $patient->id) }}" class="d-flex align-items-center flex-wrap gap-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div style="width: 36px; height: 36px; border-radius: 10px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <span class="fw-bold" style="font-size: 0.85rem; color: var(--text-secondary);">Tampilkan Riwayat:</span>
+                    </div>
+                    
+                    <select name="month" class="form-select form-select-sm" style="width: auto; min-width: 150px; border-radius: 8px; border-color: #cbd5e1; padding: 0.4rem 2rem 0.4rem 1rem;">
+                        <option value="">Semua Bulan</option>
+                        @foreach(range(1, 12) as $m)
+                            <option value="{{ $m }}" {{ request('month', $filterMonth) == $m ? 'selected' : '' }}>
+                                {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <select name="year" class="form-select form-select-sm" style="width: auto; min-width: 100px; border-radius: 8px; border-color: #cbd5e1; padding: 0.4rem 2rem 0.4rem 1rem;">
+                        @foreach(range(now()->year - 2, now()->year) as $y)
+                            <option value="{{ $y }}" {{ request('year', $filterYear) == $y ? 'selected' : '' }}>
+                                {{ $y }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <button type="submit" class="hi-btn hi-btn-sm" style="background: var(--primary); color: white; border-radius: 8px; padding: 0.4rem 1.25rem;">
+                        <i class="fas fa-filter me-1"></i> Terapkan Filter
+                    </button>
+
+                    @if(request()->has('month') && request('month') != '')
+                        <a href="{{ route('admin.pasien.show', $patient->id) }}" class="hi-btn hi-btn-sm" style="background: #f1f5f9; color: var(--text-secondary); border-radius: 8px; padding: 0.4rem 1.25rem;">
+                            <i class="fas fa-times me-1"></i> Reset
+                        </a>
+                    @endif
+                </form>
             </div>
         </div>
     </div>
@@ -505,22 +706,20 @@
                         <span class="hi-badge hi-badge-info">{{ $patient->kepatuhan->count() }} Catatan</span>
                     </div>
                     <div class="hi-card-body" style="padding: 0;">
-                        <table class="hi-table">
+                        <table class="hi-table" id="tableKepatuhan">
                             <thead>
                                 <tr>
                                     <th style="width: 50px;">No</th>
                                     <th>Tanggal & Waktu</th>
                                     <th>Status Kepatuhan</th>
                                     <th>Bukti Foto</th>
-                                    <th>Keterangan</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($patient->kepatuhan->sortByDesc('last_update') as $index => $record)
+                                @foreach($patient->kepatuhan->sortByDesc('last_update') as $index => $record)
                                 <tr>
                                     <td>
-                                        <span style="background: var(--surface); padding: 0.25rem 0.6rem; border-radius: 6px; font-weight: 600; font-size: 0.78rem; color: var(--text-secondary);">
-                                            {{ $index + 1 }}
+                                        <span class="row-number" style="background: var(--surface); padding: 0.25rem 0.6rem; border-radius: 6px; font-weight: 600; font-size: 0.78rem; color: var(--text-secondary);">
                                         </span>
                                     </td>
                                     <td>
@@ -536,10 +735,10 @@
                                     <td>
                                         @php
                                             $kBadge = match($record->status) {
-                                                'hijau' => ['class' => 'hi-badge-success', 'icon' => 'fa-check-circle', 'label' => 'Patuh (Diminum)'],
-                                                'kuning' => ['class' => 'hi-badge-warning', 'icon' => 'fa-exclamation-triangle', 'label' => 'Waspada (Tunda)'],
-                                                'merah' => ['class' => 'hi-badge-danger', 'icon' => 'fa-times-circle', 'label' => 'Beresiko (Terlewat)'],
-                                                default => ['class' => 'hi-badge-muted', 'icon' => 'fa-question-circle', 'label' => '-'],
+                                                'diminum', 'tepat waktu', 'hijau' => ['class' => 'hi-badge-success', 'icon' => 'fa-check-circle', 'label' => 'Patuh (Diminum)'],
+                                                'tunda', 'kuning' => ['class' => 'hi-badge-warning', 'icon' => 'fa-exclamation-triangle', 'label' => 'Waspada (Tunda)'],
+                                                'terlewat', 'merah' => ['class' => 'hi-badge-danger', 'icon' => 'fa-times-circle', 'label' => 'Beresiko (Terlewat)'],
+                                                default => ['class' => 'hi-badge-muted', 'icon' => 'fa-question-circle', 'label' => ucfirst($record->status ?? '-')],
                                             };
                                         @endphp
                                         <span class="hi-badge {{ $kBadge['class'] }}">
@@ -555,26 +754,8 @@
                                             <span style="font-size: 0.75rem; color: #94a3b8; font-style: italic;">Tidak ada foto</span>
                                         @endif
                                     </td>
-                                    <td style="font-size: 0.82rem; color: var(--text-secondary);">
-                                        @if($record->status === 'hijau')
-                                            Obat diminum tepat waktu
-                                        @elseif($record->status === 'kuning')
-                                            Obat diminum terlambat, perlu perhatian
-                                        @elseif($record->status === 'merah')
-                                            <span style="color: var(--danger); font-weight: 600;">⚠ Obat tidak diminum, perlu follow-up</span>
-                                        @endif
-                                    </td>
                                 </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="5">
-                                        <div class="hi-empty">
-                                            <i class="fas fa-clipboard-list"></i>
-                                            <p>Belum ada data riwayat kepatuhan untuk pasien ini.</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforelse
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
@@ -589,41 +770,23 @@
                         <span class="hi-badge hi-badge-info">{{ $patient->diaryHarian->count() }} Catatan</span>
                     </div>
                     <div class="hi-card-body" style="padding: 0;">
-                        <table class="hi-table">
+                        <table class="hi-table" id="tableDiary">
                             <thead>
                                 <tr>
                                     <th style="width: 50px;">No</th>
                                     <th>Tanggal</th>
-                                    <th>Kondisi</th>
-                                    <th>Gejala / Keluhan</th>
-                                    <th>Catatan Tambahan</th>
-                                    <th style="width: 90px;">Alert</th>
+                                    <th>Kondisi Kesehatan Pasien</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($patient->diaryHarian->sortByDesc('tanggal') as $index => $diary)
+                                @foreach($patient->diaryHarian->sortByDesc('tanggal') as $index => $diary)
                                 @php
-                                    // Deteksi kata-kata kritis dalam gejala untuk highlight visual
-                                    $kataKritis = ['demam tinggi', 'sesak napas', 'diare berat', 'muntah', 'pusing hebat', 'ruam kulit', 'gangguan penglihatan', 'nyeri dada', 'penurunan berat badan', 'infeksi', 'batuk darah', 'kejang', 'pingsan'];
-                                    $gejalaLower = strtolower($diary->gejala ?? '');
-                                    $catatanLower = strtolower($diary->catatan ?? '');
-                                    $isKritis = false;
-                                    $matchedKata = [];
-                                    foreach ($kataKritis as $kata) {
-                                        if (str_contains($gejalaLower, $kata) || str_contains($catatanLower, $kata)) {
-                                            $isKritis = true;
-                                            $matchedKata[] = $kata;
-                                        }
-                                    }
-
-                                    // Juga cek kondisi buruk
+                                    // Hanya cek kondisi buruk berdasarkan dropdown
                                     $kondisiBuruk = in_array(strtolower($diary->kondisi ?? ''), ['buruk', 'sangat buruk', 'kritis']);
-                                    $isKritis = $isKritis || $kondisiBuruk;
                                 @endphp
-                                <tr style="{{ $isKritis ? 'background: rgba(220,38,38,0.03); border-left: 3px solid var(--danger);' : '' }}">
+                                <tr style="{{ $kondisiBuruk ? 'background: rgba(220,38,38,0.03); border-left: 3px solid var(--danger);' : '' }}">
                                     <td>
-                                        <span style="background: var(--surface); padding: 0.25rem 0.6rem; border-radius: 6px; font-weight: 600; font-size: 0.78rem; color: var(--text-secondary);">
-                                            {{ $index + 1 }}
+                                        <span class="row-number" style="background: var(--surface); padding: 0.25rem 0.6rem; border-radius: 6px; font-weight: 600; font-size: 0.78rem; color: var(--text-secondary);">
                                         </span>
                                     </td>
                                     <td>
@@ -645,38 +808,8 @@
                                             <i class="fas {{ $kondisiMap['icon'] }} me-1"></i> {{ ucfirst($diary->kondisi ?? '-') }}
                                         </span>
                                     </td>
-                                    <td style="font-size: 0.82rem; max-width: 250px;">
-                                        @if($diary->gejala)
-                                            <div style="{{ $isKritis ? 'color: var(--danger); font-weight: 600;' : 'color: var(--text-primary);' }}">
-                                                {{ $diary->gejala }}
-                                            </div>
-                                        @else
-                                            <span style="color: var(--text-secondary); font-style: italic;">Tidak ada keluhan</span>
-                                        @endif
-                                    </td>
-                                    <td style="font-size: 0.82rem; color: var(--text-secondary); max-width: 200px;">
-                                        {{ $diary->catatan ?? '-' }}
-                                    </td>
-                                    <td>
-                                        @if($isKritis)
-                                            <span class="alert-kritis" title="Gejala mengandung: {{ implode(', ', $matchedKata) }}{{ $kondisiBuruk ? ' (Kondisi buruk)' : '' }}">
-                                                <i class="fas fa-exclamation-triangle"></i> Kritis
-                                            </span>
-                                        @else
-                                            <span style="font-size: 0.72rem; color: #94a3b8;">—</span>
-                                        @endif
-                                    </td>
                                 </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="6">
-                                        <div class="hi-empty">
-                                            <i class="fas fa-book-open"></i>
-                                            <p>Belum ada catatan diary kesehatan harian untuk pasien ini.</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforelse
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
@@ -691,7 +824,7 @@
                         <span class="hi-badge hi-badge-info">{{ $patient->refillObat->count() }} Pengajuan</span>
                     </div>
                     <div class="hi-card-body" style="padding: 0;">
-                        <table class="hi-table">
+                        <table class="hi-table" id="tableRefill">
                             <thead>
                                 <tr>
                                     <th style="width: 50px;">No</th>
@@ -702,11 +835,10 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($patient->refillObat->sortByDesc('created_at') as $index => $refill)
+                                @foreach($patient->refillObat->sortByDesc('created_at') as $index => $refill)
                                 <tr>
                                     <td>
-                                        <span style="background: var(--surface); padding: 0.25rem 0.6rem; border-radius: 6px; font-weight: 600; font-size: 0.78rem; color: var(--text-secondary);">
-                                            {{ $index + 1 }}
+                                        <span class="row-number" style="background: var(--surface); padding: 0.25rem 0.6rem; border-radius: 6px; font-weight: 600; font-size: 0.78rem; color: var(--text-secondary);">
                                         </span>
                                     </td>
                                     <td>
@@ -740,16 +872,7 @@
                                         @endif
                                     </td>
                                 </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="5">
-                                        <div class="hi-empty">
-                                            <i class="fas fa-prescription-bottle-alt"></i>
-                                            <p>Belum ada riwayat pengajuan refill ARV untuk pasien ini.</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforelse
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
@@ -782,3 +905,33 @@
 @endforeach
 
 @endsection
+
+@push('scripts')
+<script>
+    window.addEventListener('DOMContentLoaded', event => {
+        const tableKepatuhan = document.getElementById('tableKepatuhan');
+        if (tableKepatuhan) {
+            new simpleDatatables.DataTable(tableKepatuhan, {
+                searchable: true,
+                perPage: 10
+            });
+        }
+
+        const tableDiary = document.getElementById('tableDiary');
+        if (tableDiary) {
+            new simpleDatatables.DataTable(tableDiary, {
+                searchable: true,
+                perPage: 10
+            });
+        }
+
+        const tableRefill = document.getElementById('tableRefill');
+        if (tableRefill) {
+            new simpleDatatables.DataTable(tableRefill, {
+                searchable: true,
+                perPage: 10
+            });
+        }
+    });
+</script>
+@endpush

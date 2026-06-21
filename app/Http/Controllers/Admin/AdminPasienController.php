@@ -34,21 +34,66 @@ class AdminPasienController extends Controller
 
         $patients = $query->orderBy('created_at', 'desc')->get();
         
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+        $daysInMonth = now()->daysInMonth;
+
+        foreach ($patients as $patient) {
+            $diminumCount = $patient->kepatuhan()
+                ->whereIn('status', ['diminum', 'tepat waktu', 'hijau'])
+                ->whereMonth('last_update', $currentMonth)
+                ->whereYear('last_update', $currentYear)
+                ->count();
+            
+            $adherenceRate = round(($diminumCount / $daysInMonth) * 100);
+            
+            $terlewatCount = $patient->kepatuhan()
+                ->whereIn('status', ['terlewat', 'tunda'])
+                ->whereMonth('last_update', $currentMonth)
+                ->whereYear('last_update', $currentYear)
+                ->count();
+
+            $newStatus = 'merah';
+            if ($terlewatCount == 0) {
+                $newStatus = 'hijau';
+            } elseif ($terlewatCount <= 2) {
+                $newStatus = 'kuning';
+            } else {
+                $newStatus = 'merah';
+            }
+
+            if ($patient->status_kepatuhan !== $newStatus) {
+                $patient->status_kepatuhan = $newStatus;
+                $patient->save();
+            }
+        }
+        
         return view('admin.pasien', compact('patients'));
     }
 
     /**
      * Menampilkan halaman detail komprehensif dari seorang pasien.
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
+        $filterMonth = $request->input('month');
+        $filterYear = $request->input('year', now()->year);
+
         $patient = Pasien::with([
             'user', 
             'master', 
-            'kepatuhan' => function($query) {
+            'kepatuhan' => function($query) use ($filterMonth, $filterYear) {
+                if ($filterMonth) {
+                    $query->whereMonth('last_update', $filterMonth)
+                          ->whereYear('last_update', $filterYear);
+                }
                 $query->latest('last_update');
             }, 
-            'diaryHarian' => function($query) {
+            'diaryHarian' => function($query) use ($filterMonth, $filterYear) {
+                if ($filterMonth) {
+                    $query->whereMonth('tanggal', $filterMonth)
+                          ->whereYear('tanggal', $filterYear);
+                }
                 $query->latest('tanggal');
             }, 
             'refillObat' => function($query) {
@@ -56,13 +101,32 @@ class AdminPasienController extends Controller
             }
         ])->findOrFail($id);
         
-        // Kalkulasi persentase kepatuhan berdasarkan status hijau (patuh)
-        $totalDoses = $patient->kepatuhan->count();
-        $takenDoses = $patient->kepatuhan->where('status', 'hijau')->count();
-        
-        $adherenceRate = $totalDoses > 0 ? round(($takenDoses / $totalDoses) * 100, 2) : 0;
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+        $daysInMonth = now()->daysInMonth;
 
-        return view('admin.pasien_detail', compact('patient', 'adherenceRate'));
+        $diminumCount = $patient->kepatuhan()
+            ->whereIn('status', ['diminum', 'tepat waktu', 'hijau'])
+            ->whereMonth('last_update', $currentMonth)
+            ->whereYear('last_update', $currentYear)
+            ->count();
+        
+        $adherenceRate = round(($diminumCount / $daysInMonth) * 100);
+
+        $terlewatCount = $patient->kepatuhan()
+            ->whereIn('status', ['terlewat', 'tunda'])
+            ->whereMonth('last_update', $currentMonth)
+            ->whereYear('last_update', $currentYear)
+            ->count();
+
+        $statusWarna = 'merah';
+        if ($terlewatCount == 0) {
+            $statusWarna = 'hijau';
+        } elseif ($terlewatCount <= 2) {
+            $statusWarna = 'kuning';
+        }
+
+        return view('admin.pasien_detail', compact('patient', 'adherenceRate', 'diminumCount', 'statusWarna', 'filterMonth', 'filterYear'));
     }
 
     /**

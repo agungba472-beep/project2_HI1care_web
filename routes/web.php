@@ -46,6 +46,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/laporan/export-excel', [AdminLaporanController::class, 'exportExcel'])->name('laporan.export');
     Route::get('/laporan/cetak', [AdminLaporanController::class, 'cetakPrint'])->name('laporan.cetak');
     Route::get('/laporan/export-word', [AdminLaporanController::class, 'exportWord'])->name('laporan.word');
+    Route::get('/laporan/cetak-detail/{id}', [AdminLaporanController::class, 'cetakDetailPasien'])->name('laporan.cetakDetail');
     Route::post('/broadcast/store', [AdminBroadcastController::class, 'store'])->name('broadcast.store');
 
     Route::get('/edukasi', [AdminEdukasiController::class, 'index'])->name('edukasi.index');
