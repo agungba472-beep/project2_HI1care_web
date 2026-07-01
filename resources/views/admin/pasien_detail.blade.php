@@ -893,7 +893,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body text-center" style="background: var(--surface-light); padding: 1.5rem;">
-            <img src="{{ asset('storage/' . $record->foto_bukti) }}" alt="Bukti Foto" class="img-fluid rounded shadow-sm" style="max-height: 75vh; object-fit: contain;">
+            <img src="{{ url('/file/' . $record->foto_bukti) }}" alt="Bukti Foto" class="img-fluid rounded shadow-sm" style="max-height: 75vh; object-fit: contain;">
           </div>
           <div class="modal-footer" style="border-top: none;">
             <button type="button" class="hi-btn hi-btn-outline" data-bs-dismiss="modal">Tutup Layar</button>

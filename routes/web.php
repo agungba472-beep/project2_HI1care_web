@@ -15,6 +15,21 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+// Route untuk menampilkan file gambar bukti (bypass 403 Forbidden Hostinger)
+Route::get('/file/{path}', function ($path) {
+    $filePath = storage_path('app/public/' . $path);
+
+    if (!file_exists($filePath)) {
+        abort(404);
+    }
+
+    $mimeType = mime_content_type($filePath);
+
+    return response()->file($filePath, [
+        'Content-Type' => $mimeType,
+    ]);
+})->where('path', '.*')->name('storage.file');
+
 // Rute Autentikasi Web
 Route::get('/login', [WebAuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [WebAuthController::class, 'login']);
