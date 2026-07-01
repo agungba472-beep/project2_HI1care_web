@@ -107,7 +107,7 @@
         }
 
         .brand-content h1 span {
-            color: var(--primary);
+            color: #4ADE80;
         }
 
         .brand-content p {
