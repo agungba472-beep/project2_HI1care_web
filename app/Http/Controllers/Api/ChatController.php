@@ -285,7 +285,7 @@ class ChatController extends Controller
             try {
                 $targetUser = \App\Models\User::find($targetUserId);
                 if ($targetUser && $targetUser->expo_push_token) {
-                    \Illuminate\Support\Facades\Http::post('https://exp.host/--/api/v2/push/send', [
+                    $expoRes = \Illuminate\Support\Facades\Http::post('https://exp.host/--/api/v2/push/send', [
                         'to' => $targetUser->expo_push_token,
                         'title' => $senderType === 'pasien' ? "Pesan Pasien ($kategoriStr)" : "Balasan Nakes ($kategoriStr)",
                         'body' => $senderType === 'pasien' 
@@ -297,9 +297,12 @@ class ChatController extends Controller
                             'chat_room_id' => $konsultasi->id
                         ]
                     ]);
+                    \Illuminate\Support\Facades\Log::info('Expo Push Response: ' . $expoRes->body());
+                } else {
+                    \Illuminate\Support\Facades\Log::info('Expo Push: User tidak punya token (User ID: ' . $targetUserId . ')');
                 }
             } catch (\Exception $e) {
-                // Biarkan jika gagal (silent)
+                \Illuminate\Support\Facades\Log::error('Expo Push Error: ' . $e->getMessage());
             }
         }
 
