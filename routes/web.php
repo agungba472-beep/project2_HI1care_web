@@ -17,7 +17,13 @@ Route::get('/', function () {
 
 // Route untuk menampilkan file gambar bukti (bypass 403 Forbidden Hostinger)
 Route::get('/file/{path}', function ($path) {
+    // Cek lokasi 1: storage/app/public (default Laravel)
     $filePath = storage_path('app/public/' . $path);
+
+    // Cek lokasi 2: public/storage (jika file dipindah ke folder publik)
+    if (!file_exists($filePath)) {
+        $filePath = public_path('storage/' . $path);
+    }
 
     if (!file_exists($filePath)) {
         abort(404);
