@@ -294,7 +294,7 @@ class ChatController extends Controller
                         'sound' => 'default',
                         'data' => [
                             'type' => 'chat',
-                            'chat_room_id' => $konsultasiId
+                            'chat_room_id' => $konsultasi->id
                         ]
                     ]);
                 }

@@ -52,6 +52,12 @@ class AuthController extends Controller
         // Hapus semua token sebelumnya agar perangkat lama otomatis ter-logout (unauthorized)
         $user->tokens()->delete();
 
+        // SIMPAN EXPO PUSH TOKEN JIKA ADA
+        if ($request->has('expo_push_token')) {
+            $user->expo_push_token = $request->expo_push_token;
+            $user->save();
+        }
+
         // BUAT TOKEN
         $token = $user->createToken('auth_token')->plainTextToken;
 
