@@ -15,7 +15,7 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// Route untuk menampilkan file gambar bukti (bypass 403 Forbidden Hostinger)
+// Route untuk menampilkan file gambar dari storage (bypass 403 Forbidden Hostinger)
 Route::get('/file/{path}', function ($path) {
     // Cek lokasi 1: storage/app/public (default Laravel)
     $filePath = storage_path('app/public/' . $path);
@@ -23,6 +23,11 @@ Route::get('/file/{path}', function ($path) {
     // Cek lokasi 2: public/storage (jika file dipindah ke folder publik)
     if (!file_exists($filePath)) {
         $filePath = public_path('storage/' . $path);
+    }
+
+    // Cek lokasi 3: REAL_STORAGE_PATH dari .env (untuk Hostinger yang punya 2 folder laravel)
+    if (!file_exists($filePath) && env('REAL_STORAGE_PATH')) {
+        $filePath = env('REAL_STORAGE_PATH') . '/' . $path;
     }
 
     if (!file_exists($filePath)) {
