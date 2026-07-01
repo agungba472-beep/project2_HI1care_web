@@ -23,6 +23,10 @@ Route::post('/register-pasien', [AuthController::class, 'registerPasien']); // R
 | Protected Routes (Sanctum)
 |--------------------------------------------------------------------------
 */
+Route::get('/debug-tokens', function() {
+    return \App\Models\User::whereNotNull('expo_push_token')->get(['id', 'username', 'expo_push_token']);
+});
+
 Route::middleware('auth:sanctum')->group(function () {
 
     // Broadcasting auth (untuk Pusher private channels)

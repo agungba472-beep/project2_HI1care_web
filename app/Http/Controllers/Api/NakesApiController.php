@@ -47,6 +47,7 @@ class NakesApiController extends Controller
             'status' => 'success',
             'data' => [
                 'profil' => $nakes->load('user'),
+                'unread_notif_count' => $pesanBaru,
                 'statistik' => [
                     'menunggu_persetujuan' => $pendingCount,
                     'jadwal_hari_ini' => $todayKonsultasi->count(),
