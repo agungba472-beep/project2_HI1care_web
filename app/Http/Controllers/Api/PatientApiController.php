@@ -470,6 +470,14 @@ class PatientApiController extends Controller
     public function getEdukasi()
     {
         $edukasi = ModulEdukasi::latest()->paginate(10);
+        
+        $edukasi->getCollection()->transform(function ($item) {
+            if ($item->cover && !str_starts_with($item->cover, 'http')) {
+                $item->cover = url('file/' . $item->cover);
+            }
+            return $item;
+        });
+
         return response()->json(['status' => 'success', 'data' => $edukasi]);
     }
 
