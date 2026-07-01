@@ -144,7 +144,7 @@
                         <label for="edit_cover_{{ $modul->id }}" class="form-label">Cover / Gambar Edukasi (Opsional)</label>
                         @if($modul->cover)
                             <div style="margin-bottom: 0.5rem;">
-                                <img src="{{ url('file/' . $modul->cover) }}" alt="Cover saat ini" style="max-height: 120px; border-radius: 8px; border: 1px solid var(--border);">
+                                <img src="{{ asset('storage/' . $modul->cover) }}" alt="Cover saat ini" style="max-height: 120px; border-radius: 8px; border: 1px solid var(--border);">
                                 <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">Cover saat ini. Upload baru untuk mengganti.</div>
                             </div>
                         @endif
