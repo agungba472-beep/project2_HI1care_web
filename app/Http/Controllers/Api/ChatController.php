@@ -280,6 +280,27 @@ class ChatController extends Controller
                     : "Halo, Tenaga Kesehatan telah membalas chat Anda di sesi *$kategoriStr*.\n\nSilakan klik tautan di bawah ini untuk membuka aplikasi dan mengecek:\nhttps://hi1care.test (atau buka aplikasi di HP Anda)\n\n_Pesan otomatis dikirim oleh Aplikasi WEAR_";
                 FonnteService::sendMessage($targetUserId, $waPesan);
             } catch (\Exception $e) {}
+
+            // Kirim Expo Push Notification
+            try {
+                $targetUser = \App\Models\User::find($targetUserId);
+                if ($targetUser && $targetUser->expo_push_token) {
+                    \Illuminate\Support\Facades\Http::post('https://exp.host/--/api/v2/push/send', [
+                        'to' => $targetUser->expo_push_token,
+                        'title' => $senderType === 'pasien' ? "Pesan Pasien ($kategoriStr)" : "Balasan Nakes ($kategoriStr)",
+                        'body' => $senderType === 'pasien' 
+                            ? "Ada pesan baru masuk dari pasien di sesi $kategoriStr." 
+                            : "Nakes telah membalas chat Anda di sesi $kategoriStr. Silakan periksa.",
+                        'sound' => 'default',
+                        'data' => [
+                            'type' => 'chat',
+                            'chat_room_id' => $konsultasiId
+                        ]
+                    ]);
+                }
+            } catch (\Exception $e) {
+                // Biarkan jika gagal (silent)
+            }
         }
 
         return response()->json([
