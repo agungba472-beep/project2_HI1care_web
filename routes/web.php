@@ -20,14 +20,15 @@ Route::get('/file/{path}', function ($path) {
     // Cek lokasi 1: storage/app/public (default Laravel)
     $filePath = storage_path('app/public/' . $path);
 
-    // Cek lokasi 2: public/storage (jika file dipindah ke folder publik)
+    // Cek lokasi 2: public/storage
     if (!file_exists($filePath)) {
         $filePath = public_path('storage/' . $path);
     }
 
-    // Cek lokasi 3: REAL_STORAGE_PATH dari .env (untuk Hostinger yang punya 2 folder laravel)
-    if (!file_exists($filePath) && env('REAL_STORAGE_PATH')) {
-        $filePath = env('REAL_STORAGE_PATH') . '/' . $path;
+    // Cek lokasi 3: sibling laravel directory (Hostinger structure)
+    // base_path() = .../public_html/laravel → naik 2 level → .../laravel/storage/app/public/
+    if (!file_exists($filePath)) {
+        $filePath = dirname(base_path(), 2) . '/laravel/storage/app/public/' . $path;
     }
 
     if (!file_exists($filePath)) {
