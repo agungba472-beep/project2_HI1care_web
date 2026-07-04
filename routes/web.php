@@ -39,6 +39,7 @@ Route::get('/file/{path}', function ($path) {
 
     return response()->file($filePath, [
         'Content-Type' => $mimeType,
+        'Cache-Control' => 'public, max-age=86400' // Cache 1 hari
     ]);
 })->where('path', '.*')->name('storage.file');
 
