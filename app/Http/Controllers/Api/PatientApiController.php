@@ -102,8 +102,9 @@ class PatientApiController extends Controller
         }
 
         $alarms = AlarmArv::where('pasien_id', $pasien->id)
+            ->where('tanggal', '>=', now()->toDateString())
+            ->orderBy('tanggal')
             ->orderBy('waktu')
-            ->take(5)
             ->get();
 
         return response()->json(['status' => 'success', 'data' => $alarms]);
