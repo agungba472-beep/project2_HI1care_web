@@ -88,6 +88,9 @@ class ChatController extends Controller
     {
         $user = auth()->user();
 
+        // Catat activity user sekarang
+        \Illuminate\Support\Facades\Cache::put('user-is-online-' . $user->id, true, now()->addMinutes(2));
+
         $konsultasi = Konsultasi::with(['nakes.user', 'pasien.user'])->find($konsultasiId);
 
         if (!$konsultasi) {
@@ -143,6 +146,7 @@ class ChatController extends Controller
                     'pasien_nama'  => $konsultasi->pasien?->user?->nama ?? $konsultasi->pasien?->master?->nama ?? 'Pasien',
                     'pasien_user_id' => $konsultasi->pasien?->user_id,
                     'current_role' => $nakes ? 'nakes' : 'pasien',
+                    'is_opponent_online' => \Illuminate\Support\Facades\Cache::has('user-is-online-' . ($nakes ? $konsultasi->pasien?->user_id : $konsultasi->nakes?->user_id)),
                 ],
                 'messages' => $messages,
             ]
@@ -180,6 +184,17 @@ class ChatController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Anda tidak memiliki akses ke sesi chat ini'
+            ], 403);
+        }
+
+        // Blokir pasien mengirim pesan jika konsultasi belum diterima atau sudah selesai
+        if ($senderType === 'pasien' && !in_array($konsultasi->status, ['diterima'])) {
+            $msg = $konsultasi->status === 'selesai'
+                ? 'Sesi konsultasi ini sudah diselesaikan. Anda tidak bisa mengirim pesan lagi.'
+                : 'Konsultasi belum diterima oleh tenaga kesehatan. Mohon tunggu konfirmasi terlebih dahulu.';
+            return response()->json([
+                'status' => 'error',
+                'message' => $msg
             ], 403);
         }
 
@@ -414,7 +429,7 @@ class ChatController extends Controller
         }
 
         $konsultasiList = Konsultasi::where('nakes_id', $nakes->id)
-            ->whereIn('status', ['pending', 'diterima', 'dijadwalkan'])
+            ->whereIn('status', ['pending', 'diterima', 'dijadwalkan', 'selesai'])
             ->with([
                 'pasien.user:id,nama',
                 'pasien.master:id,no_reg_hiv,nama',

@@ -103,6 +103,7 @@ class PatientApiController extends Controller
 
         $alarms = AlarmArv::where('pasien_id', $pasien->id)
             ->orderBy('waktu')
+            ->take(5)
             ->get();
 
         return response()->json(['status' => 'success', 'data' => $alarms]);
@@ -439,7 +440,7 @@ class PatientApiController extends Controller
         if (!$pasien) return response()->json(['status' => 'error', 'message' => 'Data pasien tidak ditemukan'], 404);
 
         $konsultasi = Konsultasi::where('pasien_id', $pasien->id)
-            ->whereIn('status', ['pending', 'diterima', 'dijadwalkan'])
+            ->whereIn('status', ['pending', 'diterima', 'dijadwalkan', 'selesai'])
             ->with(['nakes.user:id,nama', 'latestChat'])
             ->orderByDesc('created_at')
             ->get()

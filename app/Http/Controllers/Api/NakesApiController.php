@@ -184,7 +184,7 @@ class NakesApiController extends Controller
         $konsultasi = Konsultasi::find($id);
         if (!$konsultasi) return response()->json(['status' => 'error', 'message' => 'Sesi tidak ditemukan'], 404);
         
-        $konsultasi->update(['status' => 'selesai']);
+        $konsultasi->update(['status' => 'selesai', 'chat_status' => 'selesai']);
         return response()->json(['status' => 'success', 'message' => 'Sesi konsultasi telah berhasil diselesaikan.']);
     }
 }
