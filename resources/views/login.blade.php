@@ -302,6 +302,19 @@
             transform: scale(0.98);
         }
 
+        /* ── Utilities for CTA ── */
+        .mt-4 { margin-top: 1.5rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .text-center { text-align: center; }
+        .small { font-size: 0.875rem; }
+        .text-muted { color: #64748b; }
+        .d-flex { display: flex; }
+        .justify-content-center { justify-content: center; }
+        .gap-2 { gap: 0.5rem; }
+        .flex-wrap { flex-wrap: wrap; }
+        .transition-hover { transition: transform 0.2s ease; display: inline-block; }
+        .transition-hover:hover { transform: scale(1.05); }
+
         /* ── Responsive Mobile ── */
         @media (max-width: 900px) {
             .login-wrapper {
@@ -410,6 +423,28 @@
                         <i class="fa-solid fa-arrow-right-to-bracket"></i>
                     </button>
                 </form>
+
+                <!-- Tambahkan blok ini di bawah form login atau di dalam card-footer -->
+                <div class="mt-4 text-center">
+                    <p class="small text-muted mb-2">
+                        <em>*Klik tombol Play Store untuk mengunduh file APK Android langsung.</em>
+                    </p>
+                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                        <!-- Tombol Google Play -->
+                        <a href="{{ asset('apk/wear.apk') }}" download class="transition-hover">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" 
+                                 alt="Get it on Google Play" 
+                                 style="height: 45px; object-fit: contain;">
+                        </a>
+                        
+                        <!-- Tombol App Store (Hanya Visual / Coming Soon) -->
+                        <a href="#" onclick="alert('Versi iOS sedang dalam tahap pengembangan.')" class="transition-hover">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" 
+                                 alt="Download on the App Store" 
+                                 style="height: 45px; object-fit: contain;">
+                        </a>
+                    </div>
+                </div>
 
             </div>
         </div>
