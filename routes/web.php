@@ -16,30 +16,45 @@ Route::get('/', function () {
 });
 
 // Route untuk menampilkan file gambar dari storage (bypass 403 Forbidden Hostinger)
-Route::get('/file/{path}', function ($path) {
-    // Cek lokasi 1: storage/app/public (default Laravel)
-    $filePath = storage_path('app/public/' . $path);
+Route::get('/file/{path}', function (\Illuminate\Http\Request $request, $path) {
+    $kandidatPath = [
+        // Lokasi 1: storage/app/public (default Laravel, HARUSNYA selalu ini)
+        storage_path('app/public/' . $path),
+        // Lokasi 2: public/storage (kalau symlink kebetulan jalan normal)
+        public_path('storage/' . $path),
+        // Lokasi 3: sibling laravel directory (dugaan struktur folder khusus Hostinger)
+        dirname(base_path(), 2) . '/laravel/storage/app/public/' . $path,
+    ];
 
-    // Cek lokasi 2: public/storage
-    if (!file_exists($filePath)) {
-        $filePath = public_path('storage/' . $path);
+    $filePath = null;
+    foreach ($kandidatPath as $kandidat) {
+        if (file_exists($kandidat)) {
+            $filePath = $kandidat;
+            break;
+        }
     }
 
-    // Cek lokasi 3: sibling laravel directory (Hostinger structure)
-    // base_path() = .../public_html/laravel → naik 2 level → .../laravel/storage/app/public/
-    if (!file_exists($filePath)) {
-        $filePath = dirname(base_path(), 2) . '/laravel/storage/app/public/' . $path;
-    }
-
-    if (!file_exists($filePath)) {
+    if (!$filePath) {
+        // PENTING: catat ke log supaya lain kali file hilang, tinggal cek
+        // storage/logs/laravel.log - tidak perlu tebak-tebak / upload ulang lagi.
+        \Log::warning('[file-route] File tidak ditemukan di semua kandidat path', [
+            'path_diminta' => $path,
+            'kandidat_dicoba' => $kandidatPath,
+        ]);
         abort(404);
     }
 
-    $mimeType = mime_content_type($filePath);
+    // Dukung cache 304 (browser/app tidak perlu download ulang kalau file belum berubah)
+    $mtime = filemtime($filePath);
+    $etag = md5($filePath . $mtime);
+    if ($request->header('If-None-Match') === $etag) {
+        return response('', 304);
+    }
 
     return response()->file($filePath, [
-        'Content-Type' => $mimeType,
-        'Cache-Control' => 'public, max-age=86400' // Cache 1 hari
+        'Content-Type' => mime_content_type($filePath),
+        'Cache-Control' => 'public, max-age=86400', // Cache 1 hari
+        'ETag' => $etag,
     ]);
 })->where('path', '.*')->name('storage.file');
 

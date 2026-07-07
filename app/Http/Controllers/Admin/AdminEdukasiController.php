@@ -13,6 +13,50 @@ class AdminEdukasiController extends Controller
         return view('admin.edukasi', compact('moduls'));
     }
 
+    /**
+     * Kompres & resize gambar cover sebelum disimpan, supaya loading di app
+     * pasien lebih cepat (terutama yang jaringannya lambat). Pakai GD bawaan
+     * PHP - tidak butuh composer package tambahan (Imagick/Intervention).
+     * Lebar maksimal 1000px, dikonversi ke JPEG kualitas 75.
+     */
+    private function kompresGambar($file): string
+    {
+        $namaBaru = 'edukasi_covers/' . uniqid() . '.jpg';
+        $tujuanFull = storage_path('app/public/' . $namaBaru);
+        if (!is_dir(dirname($tujuanFull))) {
+            mkdir(dirname($tujuanFull), 0755, true);
+        }
+
+        [$lebarAsli, $tinggiAsli, $tipe] = getimagesize($file->getRealPath());
+
+        $sumber = match ($tipe) {
+            IMAGETYPE_JPEG => imagecreatefromjpeg($file->getRealPath()),
+            IMAGETYPE_PNG => imagecreatefrompng($file->getRealPath()),
+            default => null,
+        };
+
+        // Kalau format tidak dikenali GD, fallback simpan asli tanpa kompresi
+        if (!$sumber) {
+            $file->storeAs('edukasi_covers', basename($namaBaru), 'public');
+            return $namaBaru;
+        }
+
+        $lebarBaru = min(1000, $lebarAsli);
+        $tinggiBaru = (int) ($tinggiAsli * ($lebarBaru / $lebarAsli));
+
+        $tujuanGambar = imagecreatetruecolor($lebarBaru, $tinggiBaru);
+        // Latar putih dulu (untuk PNG transparan yang dikonversi ke JPEG)
+        $putih = imagecolorallocate($tujuanGambar, 255, 255, 255);
+        imagefill($tujuanGambar, 0, 0, $putih);
+        imagecopyresampled($tujuanGambar, $sumber, 0, 0, 0, 0, $lebarBaru, $tinggiBaru, $lebarAsli, $tinggiAsli);
+
+        imagejpeg($tujuanGambar, $tujuanFull, 75);
+        imagedestroy($sumber);
+        imagedestroy($tujuanGambar);
+
+        return $namaBaru;
+    }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -23,8 +67,7 @@ class AdminEdukasiController extends Controller
 
         $coverPath = null;
         if ($request->hasFile('cover')) {
-            // Simpan gambar ke storage/app/public/edukasi_covers
-            $coverPath = $request->file('cover')->store('edukasi_covers', 'public');
+            $coverPath = $this->kompresGambar($request->file('cover'));
         }
 
         ModulEdukasi::create([
@@ -54,7 +97,7 @@ class AdminEdukasiController extends Controller
             if ($modul->cover && \Storage::disk('public')->exists($modul->cover)) {
                 \Storage::disk('public')->delete($modul->cover);
             }
-            $modul->cover = $request->file('cover')->store('edukasi_covers', 'public');
+            $modul->cover = $this->kompresGambar($request->file('cover'));
         }
 
         $modul->save();
