@@ -369,6 +369,19 @@
                     <p>Masuk ke akun Anda untuk mengelola sistem.</p>
                 </div>
 
+                @if (session('success'))
+                    <div class="alert-success" id="successAlert" style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 1rem; border-radius: 4px; margin-bottom: 2rem; display: flex; align-items: flex-start; gap: 12px;">
+                        <i class="fa-solid fa-check-circle" style="color: #22c55e; font-size: 1.25rem; margin-top: 2px;"></i>
+                        <div style="flex: 1;">
+                            <strong style="display: block; color: #166534; font-size: 0.875rem; margin-bottom: 2px;">Sukses</strong>
+                            <span style="color: #15803d; font-size: 0.875rem;">{{ session('success') }}</span>
+                        </div>
+                        <button type="button" class="close-alert" onclick="document.getElementById('successAlert').style.display='none'" style="background: none; border: none; color: #22c55e; cursor: pointer; opacity: 0.5;">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                @endif
+
                 @if ($errors->any())
                     <div class="alert-error" id="errorAlert">
                         <i class="fa-solid fa-circle-exclamation icon-err"></i>
@@ -424,6 +437,12 @@
                     </button>
                 </form>
 
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <a href="{{ route('clear-cache') }}" class="small text-muted transition-hover" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 50px; background: var(--bg-light);">
+                        <i class="fa-solid fa-broom"></i> Bersihkan Cache & Sesi
+                    </a>
+                </div>
+
                 <!-- Tambahkan blok ini di bawah form login atau di dalam card-footer -->
                 <div class="mt-4 text-center">
                     <p class="small text-muted mb-2">
@@ -431,7 +450,7 @@
                     </p>
                     <div class="d-flex justify-content-center gap-2 flex-wrap">
                         <!-- Tombol Google Play -->
-                        <a href="{{ asset('apk/wear.apk') }}" download class="transition-hover">
+                        <a href="https://arvtracker.com/laravel/public/apk/wear.apk" download class="transition-hover">
                             <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" 
                                  alt="Get it on Google Play" 
                                  style="height: 45px; object-fit: contain;">

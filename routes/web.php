@@ -63,6 +63,13 @@ Route::get('/login', [WebAuthController::class, 'showLoginForm'])->name('login')
 Route::post('/login', [WebAuthController::class, 'login']);
 Route::post('/logout', [WebAuthController::class, 'logout'])->name('logout');
 
+// Rute Clear Cache / Session Terjebak
+Route::get('/clear-cache', function () {
+    \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+    session()->flush();
+    return redirect()->route('login')->with('success', 'Cache dan Session berhasil dibersihkan! Silakan login kembali.');
+})->name('clear-cache');
+
 // Rute Admin (Dilindungi Auth)
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     
