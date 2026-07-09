@@ -67,7 +67,12 @@ Route::post('/logout', [WebAuthController::class, 'logout'])->name('logout');
 Route::get('/clear-cache', function () {
     \Illuminate\Support\Facades\Artisan::call('optimize:clear');
     session()->flush();
-    return redirect()->route('login')->with('success', 'Cache dan Session berhasil dibersihkan! Silakan login kembali.');
+    try {
+        \Illuminate\Support\Facades\DB::table('sessions')->truncate();
+    } catch (\Exception $e) {
+        \Illuminate\Support\Facades\DB::table('sessions')->delete();
+    }
+    return redirect()->route('login')->with('success', 'Cache dan seluruh sesi nyangkut berhasil dibersihkan! Silakan login kembali.');
 })->name('clear-cache');
 
 // Rute Admin (Dilindungi Auth)
