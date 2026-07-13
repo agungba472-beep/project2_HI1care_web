@@ -12,7 +12,7 @@ use App\Http\Controllers\Admin\AdminJadwalController;
 use App\Http\Controllers\Auth\WebAuthController;
 
 Route::get('/', function () {
-    return redirect()->route('login');
+    return redirect('/login');
 });
 
 // Route untuk menampilkan file gambar dari storage (bypass 403 Forbidden Hostinger)
@@ -87,6 +87,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::post('/change-password', [AdminUserController::class, 'changeOwnPassword'])->name('change-own-password');
     Route::post('/users/{id}/approve', [AdminUserController::class, 'approve'])->name('users.approve');
     Route::post('/users/{id}/reject', [AdminUserController::class, 'reject'])->name('users.reject');
     Route::post('/users/store-nakes', [AdminUserController::class, 'storeNakes'])->name('users.storeNakes');

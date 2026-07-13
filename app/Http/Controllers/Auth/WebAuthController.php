@@ -22,16 +22,10 @@ class WebAuthController extends Controller
         $user = \App\Models\User::where('username', $credentials['username'])->first();
 
         if ($user) {
-            $activeSession = \Illuminate\Support\Facades\DB::table('sessions')
+            // FITUR FORCE LOGOUT: Hapus semua sesi lama pengguna ini sebelum login baru
+            \Illuminate\Support\Facades\DB::table('sessions')
                 ->where('user_id', $user->id)
-                ->where('last_activity', '>=', time() - (config('session.lifetime') * 60))
-                ->first();
-
-            if ($activeSession && $activeSession->id !== session()->getId()) {
-                return back()->withErrors([
-                    'username' => 'Akun ini sedang aktif di perangkat lain. Anda tidak diizinkan masuk sebelum sesi sebelumnya logout atau idle 15 menit.',
-                ]);
-            }
+                ->delete();
         }
 
         if (Auth::attempt($credentials)) {

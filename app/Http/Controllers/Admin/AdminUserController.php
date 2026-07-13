@@ -210,21 +210,43 @@ class AdminUserController extends Controller
         return redirect()->back()->with('success', 'Data master pasien beserta seluruh riwayat dan akun terkait berhasil dibersihkan.');
     }
     public function resetPassword(Request $request, $id)
-{
-    // Validasi input password baru
-    $request->validate([
-        'password' => 'required|min:6|confirmed', // Harus diisi, minimal 6 karakter, dan cocok dengan field confirmation
-    ]);
+    {
+        // Validasi input password baru
+        $request->validate([
+            'password' => 'required|min:6|confirmed', // Harus diisi, minimal 6 karakter, dan cocok dengan field confirmation
+        ]);
 
-    // Cari user berdasarkan ID
-    $user = User::findOrFail($id);
-    
-    // Update password baru yang sudah di-hash
-    $user->update([
-        'password' => Hash::make($request->password)
-    ]);
+        // Cari user berdasarkan ID
+        $user = User::findOrFail($id);
+        
+        // Update password baru yang sudah di-hash
+        $user->update([
+            'password' => Hash::make($request->password)
+        ]);
 
-    // Kembalikan ke halaman sebelumnya dengan pesan sukses
-    return redirect()->back()->with('success', 'Password untuk ' . $user->nama . ' berhasil diperbarui!');
-}
+        // Kembalikan ke halaman sebelumnya dengan pesan sukses
+        return redirect()->back()->with('success', 'Password untuk ' . $user->nama . ' berhasil diperbarui!');
+    }
+
+    public function changeOwnPassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:6|confirmed',
+        ]);
+
+        $user = auth()->user();
+
+        // Verifikasi password lama
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->with('error', 'Password lama tidak sesuai!');
+        }
+
+        // Update password baru
+        $user->update([
+            'password' => Hash::make($request->new_password)
+        ]);
+
+        return back()->with('success', 'Password Anda berhasil diperbarui!');
+    }
 }
