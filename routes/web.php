@@ -44,21 +44,13 @@ Route::get('/file/{path}', function (\Illuminate\Http\Request $request, $path) {
         abort(404);
     }
 
-    // Dukung cache 304 (browser/app tidak perlu download ulang kalau file belum berubah)
-    $mtime = filemtime($filePath);
-    $etag = md5($filePath . $mtime);
-    
-    // Hapus tanda kutip dari request header karena ETag sering dikirim dengan tanda kutip
-    $clientEtag = str_replace('"', '', $request->header('If-None-Match', ''));
-    
-    if ($clientEtag === $etag) {
-        return response('', 304);
-    }
-
+    // Karena uploadPhoto Laravel menghasilkan hash nama file yang unik setiap kali
+    // gambar diganti (misal: photos/xYz123.jpg), URL-nya selalu berubah.
+    // Jadi kita tidak butuh logika ETag/304 yang sering bermasalah di React Native.
+    // Cukup suruh HP untuk menyimpan gambar ini selamanya (1 tahun).
     return response()->file($filePath, [
         'Content-Type' => mime_content_type($filePath),
         'Cache-Control' => 'public, max-age=31536000', // Cache 1 tahun penuh
-        'ETag' => '"' . $etag . '"', // Sesuai standar HTTP wajib pakai tanda kutip
     ]);
 })->where('path', '.*')->name('storage.file');
 
