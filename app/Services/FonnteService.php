@@ -18,8 +18,12 @@ class FonnteService
     public static function sendMessage($userId, $message)
     {
         try {
-            $token = env('FONNTE_TOKEN', 'HQz7iTB2pkwTpEUNB4cW');
-            if (empty($token) || !$userId) {
+            $token = env('FONNTE_TOKEN');
+            if (empty($token)) {
+                Log::error('Fonnte Error: FONNTE_TOKEN tidak diset di .env');
+                return false;
+            }
+            if (!$userId) {
                 return false;
             }
 

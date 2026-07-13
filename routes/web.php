@@ -120,3 +120,22 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     Route::get('/pasien/{id}', [AdminPasienController::class, 'show'])->name('pasien.show');
 });
+
+// Route diagnostik kesiapan production - dilindungi token rahasia lewat query
+// string, supaya bisa diakses tanpa SSH (banyak paket Hostinger shared tidak
+// kasih akses terminal). Ganti DIAGNOSTIK_TOKEN di .env dengan string acak
+// panjang, JANGAN pakai nilai default di bawah ini.
+// Akses: https://domainmu.com/diagnostik?token=ISI_TOKEN_DARI_ENV
+Route::get('/diagnostik', function (\Illuminate\Http\Request $request) {
+    $tokenValid = env('DIAGNOSTIK_TOKEN');
+    if (empty($tokenValid) || $request->query('token') !== $tokenValid) {
+        abort(404); // Sengaja 404, bukan 403, supaya tidak bocor bahwa route ini ada
+    }
+
+    $hasil = \App\Console\Commands\CekKesiapanProduksi::jalankanSemuaCek();
+
+    return response()->json([
+        'dicek_pada' => now()->toDateTimeString(),
+        'hasil' => $hasil,
+    ], 200, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+});
