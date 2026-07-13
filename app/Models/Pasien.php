@@ -63,5 +63,28 @@ class Pasien extends Model
     {
         return $this->hasMany(Chat::class);
     }
+
+    /**
+     * Hitung otomatis Fase Pengobatan berdasarkan lama bergabung
+     * - < 6 bulan = Inisiasi
+     * - >= 6 bulan = Lanjutan
+     */
+    public function getFasePengobatanAttribute()
+    {
+        if (!$this->created_at) {
+            return 'Inisiasi';
+        }
+
+        $months = $this->created_at->diffInMonths(now());
+        
+        if ($months >= 6) {
+            if ($this->status_kepatuhan === 'hijau') {
+                return 'Lanjutan (Maintenance)';
+            }
+            return 'Lanjutan (Pemantauan Ketat)';
+        }
+
+        return 'Inisiasi';
+    }
 }
 

@@ -45,8 +45,6 @@ class AdminPasienController extends Controller
                 ->whereYear('last_update', $currentYear)
                 ->count();
             
-            $adherenceRate = round(($diminumCount / $daysInMonth) * 100);
-            
             $terlewatCount = $patient->kepatuhan()
                 ->whereIn('status', ['terlewat', 'tunda'])
                 ->whereMonth('last_update', $currentMonth)
@@ -103,7 +101,13 @@ class AdminPasienController extends Controller
         
         $currentMonth = now()->month;
         $currentYear = now()->year;
-        $daysInMonth = now()->daysInMonth;
+        
+        // Perhitungan target hari dinamis (bukan statis sebulan penuh)
+        $targetDays = now()->day;
+        if ($patient->created_at && $patient->created_at->month == $currentMonth && $patient->created_at->year == $currentYear) {
+            $targetDays = now()->day - $patient->created_at->day + 1;
+        }
+        $targetDays = max(1, $targetDays); // Hindari pembagian dengan nol
 
         $diminumCount = $patient->kepatuhan()
             ->whereIn('status', ['diminum', 'tepat waktu', 'hijau'])
@@ -111,7 +115,8 @@ class AdminPasienController extends Controller
             ->whereYear('last_update', $currentYear)
             ->count();
         
-        $adherenceRate = round(($diminumCount / $daysInMonth) * 100);
+        $adherenceRate = round(($diminumCount / $targetDays) * 100);
+        $adherenceRate = min(100, $adherenceRate); // Maksimal 100%
 
         $terlewatCount = $patient->kepatuhan()
             ->whereIn('status', ['terlewat', 'tunda'])
@@ -126,7 +131,7 @@ class AdminPasienController extends Controller
             $statusWarna = 'kuning';
         }
 
-        return view('admin.pasien_detail', compact('patient', 'adherenceRate', 'diminumCount', 'statusWarna', 'filterMonth', 'filterYear'));
+        return view('admin.pasien_detail', compact('patient', 'adherenceRate', 'diminumCount', 'statusWarna', 'filterMonth', 'filterYear', 'targetDays'));
     }
 
     /**
@@ -155,14 +160,18 @@ class AdminPasienController extends Controller
                 'status_akun' => 'aktif'
             ]);
 
-            // 2. Buat Profil Pasien
+            // 2. Buat Data Master Pasien
+            $master = \App\Models\PasienMaster::create([
+                'no_reg_hiv' => $request->no_rekam_medis ?? ('REG-' . time()),
+                'nama' => $request->nama_lengkap,
+                'tgl_lahir' => $request->tanggal_lahir,
+                'is_registered' => true
+            ]);
+
+            // 3. Buat Relasi Profil Pasien
             Pasien::create([
                 'user_id' => $user->id,
-                'nama_lengkap' => $request->nama_lengkap,
-                'no_rekam_medis' => $request->no_rekam_medis,
-                'tanggal_lahir' => $request->tanggal_lahir,
-                'no_telepon' => $request->no_telepon,
-                'fase_pengobatan' => 'Inisiasi' // Nilai default
+                'pasien_master_id' => $master->id
             ]);
 
             DB::commit();

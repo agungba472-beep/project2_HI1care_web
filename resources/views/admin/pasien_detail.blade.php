@@ -446,9 +446,12 @@
                                     <i class="fas fa-calendar-alt"></i>
                                 </div>
                                 <div>
-                                    <div class="info-label">Tanggal Lahir</div>
+                                    <div class="info-label">Tanggal Lahir & Umur</div>
                                     <div class="info-value">
                                         {{ $patient->master->tgl_lahir ? \Carbon\Carbon::parse($patient->master->tgl_lahir)->format('d F Y') : '-' }}
+                                        @if($patient->master->umur_formatted != '-')
+                                            <span style="color: var(--text-secondary); font-size: 0.8rem; margin-left: 4px;">({{ $patient->master->umur_formatted }})</span>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -472,7 +475,11 @@
                                 <div>
                                     <div class="info-label">Fase Pengobatan</div>
                                     <div class="info-value">
-                                        <span class="hi-badge hi-badge-info">{{ $patient->fase_pengobatan ?? 'Inisiasi' }}</span>
+                                        @php
+                                            $fase = $patient->fase_pengobatan;
+                                            $faseBadge = str_contains($fase, 'Maintenance') ? 'hi-badge-success' : (str_contains($fase, 'Ketat') ? 'hi-badge-warning' : 'hi-badge-info');
+                                        @endphp
+                                        <span class="hi-badge {{ $faseBadge }}">{{ $fase }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -544,16 +551,10 @@
                                 <div>
                                     <div class="info-label">BMI (Body Mass Index)</div>
                                     <div class="info-value">
-                                        @if($patient->master->berat_badan && $patient->master->tinggi_badan)
-                                            @php
-                                                $bmi = $patient->master->berat_badan / pow($patient->master->tinggi_badan / 100, 2);
-                                                $bmiFormatted = number_format($bmi, 1);
-                                                $bmiLabel = $bmi < 18.5 ? 'Underweight' : ($bmi < 25 ? 'Normal' : ($bmi < 30 ? 'Overweight' : 'Obese'));
-                                                $bmiColor = $bmi < 18.5 ? '#d97706' : ($bmi < 25 ? '#059669' : ($bmi < 30 ? '#d97706' : '#dc2626'));
-                                            @endphp
-                                            {{ $bmiFormatted }}
-                                            <span class="hi-badge" style="background: {{ $bmiColor }}15; color: {{ $bmiColor }}; font-size: 0.68rem; margin-left: 0.5rem;">
-                                                {{ $bmiLabel }}
+                                        @if($patient->master->bmi_data)
+                                            {{ $patient->master->bmi_data['value'] }}
+                                            <span class="hi-badge" style="background: {{ $patient->master->bmi_data['color'] }}15; color: {{ $patient->master->bmi_data['color'] }}; font-size: 0.68rem; margin-left: 0.5rem;">
+                                                {{ $patient->master->bmi_data['label'] }}
                                             </span>
                                         @else
                                             -
@@ -607,7 +608,7 @@
                 </div>
 
                 <div class="mt-3" style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.5;">
-                    Dihitung dari <strong>{{ \Carbon\Carbon::now()->daysInMonth }}</strong> hari di bulan {{ \Carbon\Carbon::now()->translatedFormat('F') }}.
+                    Dihitung dari target <strong>{{ $targetDays ?? \Carbon\Carbon::now()->daysInMonth }}</strong> hari pada bulan {{ \Carbon\Carbon::now()->translatedFormat('F') }}.
                     <br>
                     <strong>{{ $diminumCount ?? 0 }}</strong> kali patuh minum obat bulan ini.
                 </div>

@@ -483,14 +483,23 @@
     {{-- ===== Main Content Row ===== --}}
     <div class="row g-4 mb-4">
         {{-- Chart: Analitik Kepatuhan --}}
-        <div class="col-lg-5 fade-up">
+        <div class="col-lg-5 col-12 fade-up mb-4 mb-lg-0">
             <div class="modern-card h-100">
                 <div class="card-header">
-                    <i class="fas fa-chart-pie"></i> Analitik Kepatuhan
+                    <i class="fas fa-chart-bar"></i> Analitik Kepatuhan
                 </div>
                 <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="complianceChart"></canvas>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6 col-lg-12">
+                            <div class="chart-container mb-3" style="max-width: 280px; margin: 0 auto; height: 220px;">
+                                <canvas id="complianceDoughnutChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-12">
+                            <div class="chart-container" style="max-width: 100%; height: 220px;">
+                                <canvas id="complianceBarChart"></canvas>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Compliance Progress Bars --}}
@@ -550,17 +559,18 @@
         </div>
 
         {{-- Recent Patients Table --}}
-        <div class="col-lg-7 fade-up">
+        <div class="col-lg-7 col-12 fade-up">
             <div class="modern-card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <span><i class="fas fa-users"></i> Pasien Terbaru</span>
                     <a href="{{ route('admin.pasien.index') }}" class="btn btn-view-all">
                         Lihat Semua <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
                 <div class="card-body p-0">
-                    <table class="modern-table">
-                        <thead>
+                    <div class="table-responsive">
+                        <table class="modern-table text-nowrap" style="min-width: 500px;">
+                            <thead>
                             <tr>
                                 <th>Pasien</th>
                                 <th>Status</th>
@@ -609,6 +619,7 @@
                             @endforelse
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -617,17 +628,18 @@
     {{-- ===== Bottom Row: Refill + Quick Actions ===== --}}
     <div class="row g-4 mb-4">
         {{-- Recent Refill --}}
-        <div class="col-lg-8 fade-up">
+        <div class="col-lg-8 col-12 fade-up mb-4 mb-lg-0">
             <div class="modern-card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <span><i class="fas fa-pills"></i> Refill ARV Terbaru</span>
                     <a href="{{ route('admin.refill.index') }}" class="btn btn-view-all">
                         Lihat Semua <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
                 <div class="card-body p-0">
-                    <table class="modern-table">
-                        <thead>
+                    <div class="table-responsive">
+                        <table class="modern-table text-nowrap" style="min-width: 550px;">
+                            <thead>
                             <tr>
                                 <th>Pasien</th>
                                 <th>Siklus Ke</th>
@@ -674,12 +686,13 @@
                             @endforelse
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>
 
         {{-- Quick Actions --}}
-        <div class="col-lg-4 fade-up">
+        <div class="col-lg-4 col-12 fade-up">
             <div class="modern-card h-100">
                 <div class="card-header">
                     <i class="fas fa-bolt"></i> Aksi Cepat
@@ -722,15 +735,20 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     // 1. Inisialisasi Grafik
-    const ctx = document.getElementById('complianceChart').getContext('2d');
+    const ctxDoughnut = document.getElementById('complianceDoughnutChart').getContext('2d');
+    const ctxBar = document.getElementById('complianceBarChart').getContext('2d');
     
-    let chartInstance = new Chart(ctx, {
+    const chartData = [{{ $stats['kepatuhan_hijau'] }}, {{ $stats['kepatuhan_kuning'] }}, {{ $stats['kepatuhan_merah'] }}];
+    const chartColors = ['#059669', '#d97706', '#dc2626'];
+    const chartLabels = ['Patuh (Hijau)', 'Peringatan (Kuning)', 'Drop-out (Merah)'];
+
+    let doughnutChart = new Chart(ctxDoughnut, {
         type: 'doughnut',
         data: {
-            labels: ['Patuh (Hijau)', 'Peringatan (Kuning)', 'Drop-out (Merah)'],
+            labels: chartLabels,
             datasets: [{
-                data: [{{ $stats['kepatuhan_hijau'] }}, {{ $stats['kepatuhan_kuning'] }}, {{ $stats['kepatuhan_merah'] }}],
-                backgroundColor: ['#059669', '#d97706', '#dc2626'],
+                data: chartData,
+                backgroundColor: chartColors,
                 borderColor: '#ffffff',
                 borderWidth: 3,
                 hoverOffset: 8,
@@ -740,11 +758,36 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             cutout: '68%',
             plugins: {
                 legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyleWidth: 10, font: { family: 'Inter', size: 12, weight: '500' }, color: '#64748b' } }
             },
             animation: { animateRotate: true, duration: 1200 }
+        }
+    });
+
+    let barChart = new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+            labels: chartLabels,
+            datasets: [{
+                label: 'Jumlah Pasien',
+                data: chartData,
+                backgroundColor: chartColors,
+                borderRadius: 6,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true, ticks: { precision: 0 } }
+            },
+            animation: { duration: 1200 }
         }
     });
 
@@ -780,13 +823,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.querySelector('.card-refill .stat-number').textContent = data.stats.total_refill;
                 document.querySelector('.card-broadcast .stat-number').textContent = data.stats.total_broadcast;
 
-                // Update Grafik Donat secara mulus
-                chartInstance.data.datasets[0].data = [
+                // Update Grafik secara mulus
+                const newData = [
                     data.stats.kepatuhan_hijau,
                     data.stats.kepatuhan_kuning,
                     data.stats.kepatuhan_merah
                 ];
-                chartInstance.update();
+                doughnutChart.data.datasets[0].data = newData;
+                doughnutChart.update();
+                
+                barChart.data.datasets[0].data = newData;
+                barChart.update();
 
                 // Update Progress Bar Persentase
                 const total = Math.max(data.stats.kepatuhan_hijau + data.stats.kepatuhan_kuning + data.stats.kepatuhan_merah, 1);

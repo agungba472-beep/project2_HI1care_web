@@ -130,7 +130,11 @@
                         </td>
                         <td style="font-size: 0.82rem;">{{ $patient->master->alamat ?? '-' }}</td>
                         <td>
-                            <span class="hi-badge hi-badge-info">{{ $patient->fase_pengobatan ?? 'Inisiasi' }}</span>
+                            @php
+                                $fase = $patient->fase_pengobatan;
+                                $faseBadge = str_contains($fase, 'Maintenance') ? 'hi-badge-success' : (str_contains($fase, 'Ketat') ? 'hi-badge-warning' : 'hi-badge-info');
+                            @endphp
+                            <span class="hi-badge {{ $faseBadge }}">{{ $fase }}</span>
                         </td>
                         <td>
                             @if($patient->user && $patient->user->is_active)

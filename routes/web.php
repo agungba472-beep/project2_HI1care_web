@@ -47,14 +47,18 @@ Route::get('/file/{path}', function (\Illuminate\Http\Request $request, $path) {
     // Dukung cache 304 (browser/app tidak perlu download ulang kalau file belum berubah)
     $mtime = filemtime($filePath);
     $etag = md5($filePath . $mtime);
-    if ($request->header('If-None-Match') === $etag) {
+    
+    // Hapus tanda kutip dari request header karena ETag sering dikirim dengan tanda kutip
+    $clientEtag = str_replace('"', '', $request->header('If-None-Match', ''));
+    
+    if ($clientEtag === $etag) {
         return response('', 304);
     }
 
     return response()->file($filePath, [
         'Content-Type' => mime_content_type($filePath),
-        'Cache-Control' => 'public, max-age=86400', // Cache 1 hari
-        'ETag' => $etag,
+        'Cache-Control' => 'public, max-age=31536000', // Cache 1 tahun penuh
+        'ETag' => '"' . $etag . '"', // Sesuai standar HTTP wajib pakai tanda kutip
     ]);
 })->where('path', '.*')->name('storage.file');
 

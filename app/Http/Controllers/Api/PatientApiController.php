@@ -171,14 +171,15 @@ class PatientApiController extends Controller
             return response()->json(['status'  => 'error', 'message' => 'Data pasien tidak ditemukan'], 404);
         }
 
-        // Hapus alarm 'belum' di masa depan agar tidak duplikat jadwal
-        AlarmArv::where('pasien_id', $pasien->id)
-            ->where('status', 'belum')
-            ->where('tanggal', '>=', now()->toDateString())
-            ->delete();
-
         $isEveryday = filter_var($request->is_everyday, FILTER_VALIDATE_BOOLEAN);
         $startDate = \Carbon\Carbon::parse($request->tanggal);
+        
+        // Hapus alarm 'belum' di masa depan agar tidak duplikat jadwal
+        // PERBAIKAN: Hapus dari $startDate, BUKAN dari now(), agar alarm hari ini tidak terhapus jika mulai besok
+        AlarmArv::where('pasien_id', $pasien->id)
+            ->where('status', 'belum')
+            ->where('tanggal', '>=', $startDate->toDateString())
+            ->delete();
         
         $limit = $isEveryday ? 30 : 1; 
 

@@ -119,7 +119,7 @@
         </tr>
         <tr>
             <td>Fase Pengobatan</td>
-            <td>: {{ $patient->fase_pengobatan ?? 'Inisiasi' }}</td>
+            <td>: {{ $patient->fase_pengobatan }}</td>
         </tr>
     </table>
 
