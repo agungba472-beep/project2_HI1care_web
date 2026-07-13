@@ -425,7 +425,7 @@ class PatientApiController extends Controller
             'nakes_id' => $request->nakes_id, 
             'tanggal' => $request->tanggal, 
             'waktu' => $request->waktu, 
-            'status' => 'pending',
+            'status' => $kategori === 'livechat' ? 'diterima' : 'pending',
             'kategori' => $kategori
         ]);
 
