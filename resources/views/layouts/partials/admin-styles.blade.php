@@ -259,24 +259,75 @@
     }
 
     /* ===== Form Styles ===== */
-    .hi-form .form-label {
+    .hi-form .form-label, .form-label {
         font-weight: 600;
         font-size: 0.82rem;
         color: var(--text-primary);
         margin-bottom: 0.3rem;
+        display: block;
     }
     .hi-form .form-control,
-    .hi-form .form-select {
+    .hi-form .form-select,
+    .hi-input {
         border: 1.5px solid var(--border);
         border-radius: 10px;
         padding: 0.6rem 0.85rem;
         font-size: 0.85rem;
         transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        width: 100%;
+        display: block;
+        background-color: #fff;
     }
     .hi-form .form-control:focus,
-    .hi-form .form-select:focus {
+    .hi-form .form-select:focus,
+    .hi-input:focus {
         border-color: var(--primary);
         box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
+        outline: none;
+    }
+
+    /* ===== Buttons ===== */
+    .hi-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.6rem 1.25rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+        border: 1.5px solid transparent;
+        cursor: pointer;
+    }
+    .hi-btn-primary {
+        background: var(--primary);
+        color: #fff;
+    }
+    .hi-btn-primary:hover {
+        background: var(--primary-dark);
+        color: #fff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(1, 45, 29, 0.2);
+    }
+    .hi-btn-danger {
+        background: var(--danger);
+        color: #fff;
+    }
+    .hi-btn-danger:hover {
+        background: #b91c1c;
+        color: #fff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+    }
+    .hi-btn-outline-secondary {
+        background: transparent;
+        border-color: var(--border);
+        color: var(--text-secondary);
+    }
+    .hi-btn-outline-secondary:hover {
+        background: var(--surface);
+        color: var(--text-primary);
+        border-color: var(--text-secondary);
     }
 
     /* ===== Alert ===== */
