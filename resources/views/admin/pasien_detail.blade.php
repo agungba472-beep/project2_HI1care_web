@@ -1057,12 +1057,17 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label">Infeksi Oportunistik</label>
-                    <select name="master_io_id" class="hi-input" required>
+                    <select name="master_io_id" class="hi-input" id="masterIoSelect" required onchange="toggleInputManual()">
                         <option value="">-- Pilih IO --</option>
                         @foreach($masterIos as $ioMaster)
                             <option value="{{ $ioMaster->id }}">{{ $ioMaster->nama_io }}</option>
                         @endforeach
+                        <option value="lainnya">Lainnya (Input Manual)</option>
                     </select>
+                </div>
+                <div class="mb-3" id="ioManualContainer" style="display: none;">
+                    <label class="form-label">Nama IO Baru</label>
+                    <input type="text" name="nama_io_baru" class="hi-input" placeholder="Masukkan nama infeksi...">
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Tanggal Diagnosis</label>
@@ -1100,6 +1105,18 @@
             container.style.display = 'block';
         } else {
             container.style.display = 'none';
+        }
+    }
+
+    function toggleInputManual() {
+        const ioSelect = document.getElementById('masterIoSelect').value;
+        const container = document.getElementById('ioManualContainer');
+        if (ioSelect === 'lainnya') {
+            container.style.display = 'block';
+            container.querySelector('input').setAttribute('required', 'required');
+        } else {
+            container.style.display = 'none';
+            container.querySelector('input').removeAttribute('required');
         }
     }
 </script>

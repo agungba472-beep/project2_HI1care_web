@@ -265,7 +265,8 @@ class AdminPasienController extends Controller
     public function storeRiwayatIo(Request $request, $id)
     {
         $request->validate([
-            'master_io_id' => 'required|exists:master_ios,id',
+            'master_io_id' => 'required',
+            'nama_io_baru' => 'required_if:master_io_id,lainnya',
             'tanggal_diagnosis' => 'required|date',
             'status' => 'required|in:aktif,sembuh',
             'tanggal_sembuh' => 'nullable|date',
@@ -273,10 +274,21 @@ class AdminPasienController extends Controller
         ]);
 
         $patient = Pasien::findOrFail($id);
+        
+        $master_io_id = $request->master_io_id;
+        
+        // Handle input manual
+        if ($master_io_id === 'lainnya') {
+            $newMasterIo = MasterIo::create([
+                'nama_io' => $request->nama_io_baru,
+                'status_aktif' => true,
+            ]);
+            $master_io_id = $newMasterIo->id;
+        }
 
         RiwayatIo::create([
             'pasien_id' => $patient->user_id,
-            'master_io_id' => $request->master_io_id,
+            'master_io_id' => $master_io_id,
             'tanggal_diagnosis' => $request->tanggal_diagnosis,
             'status' => $request->status,
             'tanggal_sembuh' => $request->status === 'sembuh' ? $request->tanggal_sembuh : null,

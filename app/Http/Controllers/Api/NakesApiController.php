@@ -244,16 +244,27 @@ class NakesApiController extends Controller
     public function storeRiwayatIo(Request $request, $id)
     {
         $request->validate([
-            'master_io_id' => 'required|exists:master_ios,id',
+            'master_io_id' => 'required',
+            'nama_io_baru' => 'required_if:master_io_id,lainnya',
             'tanggal_diagnosis' => 'required|date',
             'status' => 'required|in:aktif,sembuh',
             'tanggal_sembuh' => 'nullable|date',
             'catatan' => 'nullable|string'
         ]);
 
+        $master_io_id = $request->master_io_id;
+        
+        if ($master_io_id === 'lainnya') {
+            $newMasterIo = \App\Models\MasterIo::create([
+                'nama_io' => $request->nama_io_baru,
+                'status_aktif' => true,
+            ]);
+            $master_io_id = $newMasterIo->id;
+        }
+
         RiwayatIo::create([
             'pasien_id' => $id,
-            'master_io_id' => $request->master_io_id,
+            'master_io_id' => $master_io_id,
             'tanggal_diagnosis' => $request->tanggal_diagnosis,
             'status' => $request->status,
             'tanggal_sembuh' => $request->status === 'sembuh' ? $request->tanggal_sembuh : null,
