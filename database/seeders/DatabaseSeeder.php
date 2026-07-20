@@ -96,5 +96,7 @@ class DatabaseSeeder extends Seeder
             'siklus_ke' => 5,
             'status' => 'menunggu'
         ]);
+
+        $this->call([MasterObatSeeder::class]);
     }
 }

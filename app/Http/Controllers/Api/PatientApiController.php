@@ -14,6 +14,8 @@ use App\Models\Nakes;
 use App\Models\Notifikasi;
 use App\Models\Pasien;
 use App\Models\RefillObat;
+use App\Models\RiwayatRegimenPasien;
+use App\Models\RiwayatIo;
 use Illuminate\Http\Request;
 
 class PatientApiController extends Controller
@@ -528,6 +530,46 @@ class PatientApiController extends Controller
     {
         $faskes = Faskes::orderBy('nama')->get();
         return response()->json(['status' => 'success', 'data' => $faskes]);
+    }
+
+    // ===================================================================
+    // DATA KLINIS PASIEN (Read-Only)
+    // ===================================================================
+
+    public function getRegimenAktif()
+    {
+        $pasien = $this->getPasien();
+        if (!$pasien) {
+            return response()->json(['status' => 'error', 'message' => 'Data pasien tidak ditemukan'], 404);
+        }
+
+        $regimen = RiwayatRegimenPasien::with(['masterObat'])
+            ->where('pasien_id', $pasien->user_id)
+            ->whereNull('tanggal_selesai')
+            ->first();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $regimen
+        ]);
+    }
+
+    public function getRiwayatIo()
+    {
+        $pasien = $this->getPasien();
+        if (!$pasien) {
+            return response()->json(['status' => 'error', 'message' => 'Data pasien tidak ditemukan'], 404);
+        }
+
+        $ios = RiwayatIo::with(['masterIo'])
+            ->where('pasien_id', $pasien->user_id)
+            ->orderBy('tanggal_diagnosis', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $ios
+        ]);
     }
 
 }

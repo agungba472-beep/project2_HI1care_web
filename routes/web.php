@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\AdminLaporanController;
 use App\Http\Controllers\Admin\AdminBroadcastController;
 use App\Http\Controllers\Admin\AdminEdukasiController;
 use App\Http\Controllers\Admin\AdminJadwalController;
+use App\Http\Controllers\Admin\AdminMasterKlinisController;
 use App\Http\Controllers\Auth\WebAuthController;
 
 Route::get('/', function () {
@@ -87,8 +88,25 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::delete('/master/{id}', [AdminUserController::class, 'destroyMaster'])->name('master.destroy');
     Route::delete('/users/{id}', [AdminUserController::class, 'destroy'])->name('users.destroy');
     Route::put('/users/{id}/reset-password', [AdminUserController::class, 'resetPassword'])->name('users.reset-password');
+    
+    // MASTER OBAT & IO
+    Route::get('/master-obat', [AdminMasterKlinisController::class, 'indexObat'])->name('master.obat');
+    Route::post('/master-obat/store', [AdminMasterKlinisController::class, 'storeObat'])->name('master.obat.store');
+    Route::post('/master-obat/{id}', [AdminMasterKlinisController::class, 'updateObat'])->name('master.obat.update');
+    
+    Route::get('/master-io', [AdminMasterKlinisController::class, 'indexIo'])->name('master.io');
+    Route::post('/master-io/store', [AdminMasterKlinisController::class, 'storeIo'])->name('master.io.store');
+    Route::post('/master-io/{id}', [AdminMasterKlinisController::class, 'updateIo'])->name('master.io.update');
+
     Route::get('/pasien', [AdminPasienController::class, 'index'])->name('pasien.index');
     Route::post('/pasien/store', [AdminPasienController::class, 'store'])->name('pasien.store');
+    Route::get('/pasien/{id}', [AdminPasienController::class, 'show'])->name('pasien.show');
+    Route::put('/pasien/{id}/toggle-status', [AdminPasienController::class, 'toggleStatus'])->name('pasien.toggle-status');
+    
+    // RIWAYAT KLINIS PASIEN
+    Route::post('/pasien/{id}/riwayat-regimen', [AdminPasienController::class, 'storeRiwayatRegimen'])->name('pasien.riwayat-regimen.store');
+    Route::post('/pasien/{id}/riwayat-io', [AdminPasienController::class, 'storeRiwayatIo'])->name('pasien.riwayat-io.store');
+
     Route::get('/refill', [AdminRefillController::class, 'index'])->name('refill.index');
     Route::post('/refill/{id}/update-status', [AdminRefillController::class, 'updateStatus'])->name('refill.updateStatus');
     

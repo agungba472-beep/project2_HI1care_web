@@ -76,6 +76,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Konsultasi aktif pasien (untuk masuk ke chat)
         Route::get('/my-consultations', [PatientApiController::class, 'getMyConsultations']);
+
+        // Riwayat Klinis Pasien (Read-only)
+        Route::get('/regimen-aktif', [PatientApiController::class, 'getRegimenAktif']);
+        Route::get('/riwayat-io', [PatientApiController::class, 'getRiwayatIo']);
     });
 
     // ==========================================
@@ -94,6 +98,15 @@ Route::middleware('auth:sanctum')->group(function () {
         // Monitoring Pasien
         Route::get('/patients', [NakesApiController::class, 'getMyPatients']);
         Route::get('/patients/{id}', [NakesApiController::class, 'getPatientDetail']);
+        
+        // Input Data Klinis Pasien (Regimen & IO) - Dibuka untuk Nakes & Admin
+        Route::middleware('role:nakes,admin')->group(function () {
+            Route::get('/patients/{id}/riwayat-regimen', [NakesApiController::class, 'getRiwayatRegimen']);
+            Route::post('/patients/{id}/riwayat-regimen', [NakesApiController::class, 'storeRiwayatRegimen']);
+            
+            Route::get('/patients/{id}/riwayat-io', [NakesApiController::class, 'getRiwayatIo']);
+            Route::post('/patients/{id}/riwayat-io', [NakesApiController::class, 'storeRiwayatIo']);
+        });
     });
     // --- CHAT API (Shared: Pasien & Nakes) ---
     Route::prefix('chat')->group(function () {

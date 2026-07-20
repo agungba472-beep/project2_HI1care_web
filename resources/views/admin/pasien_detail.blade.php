@@ -696,6 +696,18 @@
                     <span class="hi-badge hi-badge-muted ms-1">{{ $patient->refillObat->count() }}</span>
                 </button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="regimen-tab" data-bs-toggle="tab" data-bs-target="#regimenContent" type="button" role="tab">
+                    <i class="fas fa-prescription-bottle-alt me-1"></i> Riwayat Regimen
+                    <span class="hi-badge hi-badge-muted ms-1">{{ $riwayatRegimen->count() }}</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="io-tab" data-bs-toggle="tab" data-bs-target="#ioContent" type="button" role="tab">
+                    <i class="fas fa-viruses me-1"></i> Riwayat IO
+                    <span class="hi-badge hi-badge-muted ms-1">{{ $riwayatIo->count() }}</span>
+                </button>
+            </li>
         </ul>
 
         <div class="tab-content" id="detailTabContent">
@@ -879,6 +891,95 @@
                     </div>
                 </div>
             </div>
+
+            {{-- ===== TAB CONTENT: RIWAYAT REGIMEN ===== --}}
+            <div class="tab-pane fade" id="regimenContent" role="tabpanel">
+                <div class="hi-card">
+                    <div class="hi-card-header">
+                        <span><i class="fas fa-prescription-bottle-alt"></i> Riwayat Regimen ARV</span>
+                        <button class="hi-btn hi-btn-primary hi-btn-sm" data-bs-toggle="modal" data-bs-target="#addRegimenModal">
+                            <i class="fas fa-plus"></i> Tambah
+                        </button>
+                    </div>
+                    <div class="hi-card-body" style="padding: 0;">
+                        <table class="hi-table">
+                            <thead>
+                                <tr>
+                                    <th>Regimen</th>
+                                    <th>Tanggal Mulai</th>
+                                    <th>Tanggal Selesai</th>
+                                    <th>Alasan Ganti</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($riwayatRegimen as $reg)
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold">{{ $reg->masterObat->kode_regimen }}</div>
+                                            <div class="text-secondary" style="font-size: 0.8rem;">{{ $reg->masterObat->nama_lengkap }}</div>
+                                        </td>
+                                        <td>{{ \Carbon\Carbon::parse($reg->tanggal_mulai)->translatedFormat('d M Y') }}</td>
+                                        <td>
+                                            @if($reg->tanggal_selesai)
+                                                {{ \Carbon\Carbon::parse($reg->tanggal_selesai)->translatedFormat('d M Y') }}
+                                            @else
+                                                <span class="hi-badge hi-badge-success">Aktif</span>
+                                            @endif
+                                        </td>
+                                        <td>{{ $reg->alasan_ganti ?? '-' }}</td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="4" class="text-center text-muted">Belum ada riwayat regimen.</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ===== TAB CONTENT: RIWAYAT IO ===== --}}
+            <div class="tab-pane fade" id="ioContent" role="tabpanel">
+                <div class="hi-card">
+                    <div class="hi-card-header">
+                        <span><i class="fas fa-viruses"></i> Riwayat Infeksi Oportunistik</span>
+                        <button class="hi-btn hi-btn-danger hi-btn-sm" data-bs-toggle="modal" data-bs-target="#addIoModal">
+                            <i class="fas fa-plus"></i> Tambah
+                        </button>
+                    </div>
+                    <div class="hi-card-body" style="padding: 0;">
+                        <table class="hi-table">
+                            <thead>
+                                <tr>
+                                    <th>Infeksi Oportunistik</th>
+                                    <th>Tgl Diagnosis</th>
+                                    <th>Status</th>
+                                    <th>Tgl Sembuh</th>
+                                    <th>Catatan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($riwayatIo as $io)
+                                    <tr>
+                                        <td><div class="fw-bold">{{ $io->masterIo->nama_io }}</div></td>
+                                        <td>{{ \Carbon\Carbon::parse($io->tanggal_diagnosis)->translatedFormat('d M Y') }}</td>
+                                        <td>
+                                            @if($io->status === 'aktif')
+                                                <span class="hi-badge hi-badge-danger">Aktif</span>
+                                            @else
+                                                <span class="hi-badge hi-badge-success">Sembuh</span>
+                                            @endif
+                                        </td>
+                                        <td>{{ $io->tanggal_sembuh ? \Carbon\Carbon::parse($io->tanggal_sembuh)->translatedFormat('d M Y') : '-' }}</td>
+                                        <td>{{ $io->catatan ?? '-' }}</td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="5" class="text-center text-muted">Belum ada riwayat IO.</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -904,6 +1005,104 @@
     </div>
     @endif
 @endforeach
+
+<!-- Modal Tambah Regimen -->
+<div class="modal fade" id="addRegimenModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" action="{{ route('admin.pasien.riwayat-regimen.store', $patient->id) }}" method="POST">
+            @csrf
+            <div class="modal-header">
+                <h5 class="modal-title">Tambah Riwayat Regimen</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Regimen Obat</label>
+                    <select name="master_obat_id" class="hi-input" required>
+                        <option value="">-- Pilih Regimen --</option>
+                        @foreach($masterObats as $obat)
+                            <option value="{{ $obat->id }}">{{ $obat->kode_regimen }} - {{ $obat->nama_lengkap }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Tanggal Mulai</label>
+                    <input type="date" name="tanggal_mulai" class="hi-input" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Alasan Ganti (Jika ada)</label>
+                    <textarea name="alasan_ganti" class="hi-input" rows="2"></textarea>
+                </div>
+                <div class="alert alert-warning" style="font-size: 0.8rem;">
+                    <strong>Perhatian:</strong> Menambahkan regimen baru akan otomatis menutup regimen aktif sebelumnya dan mengisi tanggal selesainya.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="hi-btn hi-btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="submit" class="hi-btn hi-btn-primary">Simpan Regimen</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Tambah IO -->
+<div class="modal fade" id="addIoModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" action="{{ route('admin.pasien.riwayat-io.store', $patient->id) }}" method="POST">
+            @csrf
+            <div class="modal-header">
+                <h5 class="modal-title">Tambah Riwayat IO</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Infeksi Oportunistik</label>
+                    <select name="master_io_id" class="hi-input" required>
+                        <option value="">-- Pilih IO --</option>
+                        @foreach($masterIos as $ioMaster)
+                            <option value="{{ $ioMaster->id }}">{{ $ioMaster->nama_io }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Tanggal Diagnosis</label>
+                    <input type="date" name="tanggal_diagnosis" class="hi-input" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="hi-input" id="ioStatusSelect" required onchange="toggleTglSembuh()">
+                        <option value="aktif">Aktif</option>
+                        <option value="sembuh">Sembuh</option>
+                    </select>
+                </div>
+                <div class="mb-3" id="ioTglSembuhContainer" style="display: none;">
+                    <label class="form-label">Tanggal Sembuh</label>
+                    <input type="date" name="tanggal_sembuh" class="hi-input">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Catatan Tambahan</label>
+                    <textarea name="catatan" class="hi-input" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="hi-btn hi-btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="submit" class="hi-btn hi-btn-danger">Simpan IO</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleTglSembuh() {
+        const status = document.getElementById('ioStatusSelect').value;
+        const container = document.getElementById('ioTglSembuhContainer');
+        if (status === 'sembuh') {
+            container.style.display = 'block';
+        } else {
+            container.style.display = 'none';
+        }
+    }
+</script>
 
 @endsection
 

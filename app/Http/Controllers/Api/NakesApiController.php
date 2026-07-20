@@ -7,7 +7,10 @@ use App\Models\Konsultasi;
 use App\Models\Nakes;
 use App\Models\Pasien;
 use App\Models\Chat;
+use App\Models\RiwayatRegimenPasien;
+use App\Models\RiwayatIo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class NakesApiController extends Controller
 {
@@ -186,5 +189,78 @@ class NakesApiController extends Controller
         
         $konsultasi->update(['status' => 'selesai', 'chat_status' => 'selesai']);
         return response()->json(['status' => 'success', 'message' => 'Sesi konsultasi telah berhasil diselesaikan.']);
+    }
+
+    // ===================================================================
+    // 5. INPUT DATA KLINIS PASIEN
+    // ===================================================================
+    public function getRiwayatRegimen($id)
+    {
+        $riwayat = RiwayatRegimenPasien::with(['masterObat', 'nakes'])->where('pasien_id', $id)->orderBy('tanggal_mulai', 'desc')->get();
+        return response()->json(['status' => 'success', 'data' => $riwayat]);
+    }
+
+    public function storeRiwayatRegimen(Request $request, $id)
+    {
+        $request->validate([
+            'master_obat_id' => 'required|exists:master_obats,id',
+            'tanggal_mulai' => 'required|date',
+            'alasan_ganti' => 'nullable|string'
+        ]);
+
+        try {
+            DB::transaction(function () use ($request, $id) {
+                // Auto-close regimen lama
+                $activeRegimen = RiwayatRegimenPasien::where('pasien_id', $id)->whereNull('tanggal_selesai')->first();
+                if ($activeRegimen) {
+                    $activeRegimen->update([
+                        'tanggal_selesai' => $request->tanggal_mulai,
+                        'alasan_ganti' => $request->alasan_ganti ?? 'Diganti dengan regimen baru'
+                    ]);
+                }
+
+                // Insert regimen baru
+                RiwayatRegimenPasien::create([
+                    'pasien_id' => $id,
+                    'master_obat_id' => $request->master_obat_id,
+                    'tanggal_mulai' => $request->tanggal_mulai,
+                    'ditetapkan_oleh' => auth()->id(),
+                    'alasan_ganti' => $request->alasan_ganti
+                ]);
+            });
+
+            return response()->json(['status' => 'success', 'message' => 'Regimen berhasil diperbarui.']);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Gagal memperbarui regimen.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getRiwayatIo($id)
+    {
+        $riwayat = RiwayatIo::with(['masterIo', 'nakes'])->where('pasien_id', $id)->orderBy('tanggal_diagnosis', 'desc')->get();
+        return response()->json(['status' => 'success', 'data' => $riwayat]);
+    }
+
+    public function storeRiwayatIo(Request $request, $id)
+    {
+        $request->validate([
+            'master_io_id' => 'required|exists:master_ios,id',
+            'tanggal_diagnosis' => 'required|date',
+            'status' => 'required|in:aktif,sembuh',
+            'tanggal_sembuh' => 'nullable|date',
+            'catatan' => 'nullable|string'
+        ]);
+
+        RiwayatIo::create([
+            'pasien_id' => $id,
+            'master_io_id' => $request->master_io_id,
+            'tanggal_diagnosis' => $request->tanggal_diagnosis,
+            'status' => $request->status,
+            'tanggal_sembuh' => $request->status === 'sembuh' ? $request->tanggal_sembuh : null,
+            'catatan' => $request->catatan,
+            'ditetapkan_oleh' => auth()->id(),
+        ]);
+
+        return response()->json(['status' => 'success', 'message' => 'Riwayat IO berhasil ditambahkan.']);
     }
 }
