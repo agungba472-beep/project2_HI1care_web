@@ -101,6 +101,8 @@ Route::middleware('auth:sanctum')->group(function () {
         
         // Input Data Klinis Pasien (Regimen & IO) - Dibuka untuk Nakes & Admin
         Route::middleware('role:nakes,admin')->group(function () {
+            Route::get('/master-klinis', [NakesApiController::class, 'getMasterKlinis']);
+            
             Route::get('/patients/{id}/riwayat-regimen', [NakesApiController::class, 'getRiwayatRegimen']);
             Route::post('/patients/{id}/riwayat-regimen', [NakesApiController::class, 'storeRiwayatRegimen']);
             

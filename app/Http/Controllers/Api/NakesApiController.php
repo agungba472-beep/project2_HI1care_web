@@ -194,6 +194,20 @@ class NakesApiController extends Controller
     // ===================================================================
     // 5. INPUT DATA KLINIS PASIEN
     // ===================================================================
+    public function getMasterKlinis()
+    {
+        $obats = \App\Models\MasterObat::where('status_aktif', true)->get();
+        $ios = \App\Models\MasterIo::where('status_aktif', true)->get();
+        
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'obats' => $obats,
+                'ios' => $ios
+            ]
+        ]);
+    }
+
     public function getRiwayatRegimen($id)
     {
         $riwayat = RiwayatRegimenPasien::with(['masterObat', 'nakes'])->where('pasien_id', $id)->orderBy('tanggal_mulai', 'desc')->get();
