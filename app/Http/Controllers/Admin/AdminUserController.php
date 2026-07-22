@@ -117,55 +117,50 @@ class AdminUserController extends Controller
         // 1. JURUS ULTIMATE: Bius penjaga MySQL agar tidak rewel!
         \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
 
-        $user = User::withTrashed()->findOrFail($id);
+        $user = User::findOrFail($id);
         
         if ($user->role === 'pasien') {
-            // withTrashed() memastikan data yang sudah "soft delete" tetap tertangkap
-            $pasien = Pasien::withTrashed()->where('user_id', $user->id)->first();
+            $pasien = Pasien::where('user_id', $user->id)->first();
             
             if ($pasien) {
                 $pasienId = $pasien->id;
                 $masterId = $pasien->pasien_master_id;
                 
-                $konsultasiIds = \App\Models\Konsultasi::withTrashed()->where('pasien_id', $pasienId)->pluck('id');
+                $konsultasiIds = \App\Models\Konsultasi::where('pasien_id', $pasienId)->pluck('id');
                 if ($konsultasiIds->isNotEmpty()) {
                     DB::table('chat')->whereIn('konsultasi_id', $konsultasiIds)->delete();
                 }
                 
-                // Sapu bersih menggunakan forceDelete()
-                \App\Models\Konsultasi::withTrashed()->where('pasien_id', $pasienId)->forceDelete();
-                \App\Models\RefillObat::withTrashed()->where('pasien_id', $pasienId)->forceDelete();
-                \App\Models\Kepatuhan::withTrashed()->where('pasien_id', $pasienId)->forceDelete();
-                \App\Models\DiaryHarian::withTrashed()->where('pasien_id', $pasienId)->forceDelete();
-                \App\Models\AlarmArv::withTrashed()->where('pasien_id', $pasienId)->forceDelete();
+                // Sapu bersih
+                \App\Models\Konsultasi::where('pasien_id', $pasienId)->delete();
+                \App\Models\RefillObat::where('pasien_id', $pasienId)->delete();
+                \App\Models\Kepatuhan::where('pasien_id', $pasienId)->delete();
+                \App\Models\DiaryHarian::where('pasien_id', $pasienId)->delete();
+                \App\Models\AlarmArv::where('pasien_id', $pasienId)->delete();
 
-                $pasien->forceDelete();
-                
-                // if ($masterId) {
-                //     \App\Models\PasienMaster::withTrashed()->where('id', $masterId)->forceDelete();
-                // }
+                $pasien->delete();
             }
         } 
         elseif ($user->role === 'nakes') {
-            $nakes = Nakes::withTrashed()->where('user_id', $user->id)->first();
+            $nakes = Nakes::where('user_id', $user->id)->first();
             
             if ($nakes) {
                 $nakesId = $nakes->id;
                 
-                $konsultasiIds = \App\Models\Konsultasi::withTrashed()->where('nakes_id', $nakesId)->pluck('id');
+                $konsultasiIds = \App\Models\Konsultasi::where('nakes_id', $nakesId)->pluck('id');
                 if ($konsultasiIds->isNotEmpty()) {
                     DB::table('chat')->whereIn('konsultasi_id', $konsultasiIds)->delete();
                 }
                 
-                \App\Models\Konsultasi::withTrashed()->where('nakes_id', $nakesId)->forceDelete();
+                \App\Models\Konsultasi::where('nakes_id', $nakesId)->delete();
                 \App\Models\JadwalNakes::where('nakes_id', $nakesId)->delete(); // Hapus jadwal nakes juga
                 
-                $nakes->forceDelete();
+                $nakes->delete();
             }
         }
 
         // Hapus akun utama
-        $user->forceDelete();
+        $user->delete();
 
         // 2. Bangunkan kembali penjaga MySQL
         \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
