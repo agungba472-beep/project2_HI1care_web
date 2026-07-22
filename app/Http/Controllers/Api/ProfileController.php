@@ -111,7 +111,13 @@ class ProfileController extends Controller
                 $masterData['tinggi_badan'] = $request->tinggi_badan;
             }
 
-            if (!empty($masterData) && $user->pasien && $user->pasien->master) {
+            if (!empty($masterData)) {
+                if (!$user->pasien || !$user->pasien->master) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Data master pasien belum tersedia, hubungi admin.'
+                    ], 400);
+                }
                 $user->pasien->master->update($masterData);
             }
         }
@@ -141,20 +147,28 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
-        // Hapus foto lama jika ada
-        if ($user->photo && Storage::disk('public')->exists($user->photo)) {
-            Storage::disk('public')->delete($user->photo);
+        try {
+            // Hapus foto lama jika ada
+            if ($user->photo && Storage::disk('public')->exists($user->photo)) {
+                Storage::disk('public')->delete($user->photo);
+            }
+
+            // Simpan foto baru
+            $path = $request->file('photo')->store('photos', 'public');
+
+            $user->update(['photo' => $path]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Foto profil berhasil diperbarui',
+                'photo_url' => $user->photo_url,
+            ]);
+        } catch (\Exception $e) {
+            \Log::warning('Gagal upload foto profil user ID ' . $user->id . ' | Error: ' . $e->getMessage(), ['exception' => $e]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan saat menyimpan foto. Silakan coba lagi.'
+            ], 500);
         }
-
-        // Simpan foto baru
-        $path = $request->file('photo')->store('photos', 'public');
-
-        $user->update(['photo' => $path]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Foto profil berhasil diperbarui',
-            'photo_url' => $user->photo_url,
-        ]);
     }
 }
